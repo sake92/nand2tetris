@@ -1,0 +1,31 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/01/Not.hdl
+
+/**
+ * Not gate:
+ * out = not in
+ 
+ NAND
+a b out
+0 0 1
+0 1 1
+1 0 1
+1 1 0
+
+NOT
+a out
+0 1
+1 0
+
+značiiiiiiii, kad je a==b onda imamo NOT(a) :D
+ */
+
+CHIP Not {
+    IN in;
+    OUT out;
+
+    PARTS:
+    Nand(a=in, b=in, out=out);
+}
