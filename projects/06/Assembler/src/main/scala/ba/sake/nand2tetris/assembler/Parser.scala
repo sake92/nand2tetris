@@ -96,6 +96,9 @@ final class Parser(symbolTable: SymbolTable) {
   val Instruction: P[I.Instruction] = SymbolInstruction | AInstruction | CInstruction
   val FinalP = Whitespace.rep ~ Instruction.? ~ Whitespace.rep ~ Comment.?
 
+  /** @param lines List of lines of an .asm file
+    * @return List of instructions, A and C only!
+    */
   def parse(lines: Seq[String]): Seq[I.Instruction] = {
     val allInstructions = lines.flatMap { i =>
       val res = FinalP.parse(i)

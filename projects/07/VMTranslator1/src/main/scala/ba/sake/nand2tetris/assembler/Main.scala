@@ -6,8 +6,33 @@ import java.io.PrintWriter
 import java.nio.charset.StandardCharsets
 
 object Main {
-
+  
   def main(args: Array[String]): Unit = {
+    val program = """
+push constant 111
+push constant 333
+push constant 888
+pop static 8
+pop static 3
+pop static 1
+push static 3
+push static 1
+sub
+push static 8
+add
+
+      """
+    val lines = program.lines.toVector
+    val parser = new Parser()
+    val outputWriter = new PrintWriter( System.out)
+    val codeGenerator = new CodeGenerator(outputWriter)
+    
+    val instructions = parser.parse(lines)
+    codeGenerator.generate(instructions, "BLA")
+    outputWriter.close()
+  }
+
+  def main2(args: Array[String]): Unit = {
 
     val res = handleArgs(args)
     if (res.isEmpty) return
@@ -15,15 +40,14 @@ object Main {
 
     val inputFile = new File(fileName)
     val lines = Source.fromFile(inputFile).getLines.toVector
-    val outputFile = new File(name + ".hack")
+    val outputFile = new File(name + ".asm")
     val outputWriter = new PrintWriter(outputFile, StandardCharsets.UTF_8.name)
 
-    val symbolTable = new SymbolTable()
-    val parser = new Parser(symbolTable)
-    val codeGenerator = new CodeGenerator(symbolTable, outputWriter)
+    val parser = new Parser()
+    val codeGenerator = new CodeGenerator(outputWriter)
 
     val instructions = parser.parse(lines)
-    val code = codeGenerator.generate(instructions)
+    val code = codeGenerator.generate(instructions, fileName)
 
     outputWriter.close()
   }
@@ -42,8 +66,8 @@ object Main {
       val (name, ext) = fileName.splitAt(fileName.length - 4)
       println("NAME: " + name)
       println("ext: " + ext)
-      if (ext != ".asm") {
-        println("File must have '.asm' extension!")
+      if (ext != ".vm") {
+        println("File must have '.vm' extension!")
         None
       } else {
         Option(fileName, name)
