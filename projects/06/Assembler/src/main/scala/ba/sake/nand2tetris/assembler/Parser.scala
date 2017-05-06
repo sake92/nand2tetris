@@ -1,25 +1,33 @@
 package ba.sake.nand2tetris.assembler
 
+import java.io.BufferedReader
+import java.io.File
+import java.io.InputStream
+import java.nio.file.Files
 import fastparse.all._
 
 /** Instructions AST */
 object I {
+
   sealed trait Instruction
+  sealed trait RealInstruction extends Instruction // A or C
 
-  final case class SymbolInstruction(symbol: String) extends Instruction // symbol pseudo-instruction: (something)
+  // not a REAL instruction, used just to point to the next instruction
+  // DOESN't EXTEND the Instruction trait
+  case class SymbolInstruction(symbol: String) extends Instruction // (something)
 
-  final case class AInstruction(constOrSymbol: Either[Int, String]) extends Instruction // a instruction: @123 or @something
+  case class AInstruction(constOrSymbol: Either[Int, String]) extends RealInstruction // a instruction: @123 or @something
   object AInstruction {
     def apply(const: Int): AInstruction = AInstruction(Left(const))
     def apply(symbol: String): AInstruction = AInstruction(Right(symbol))
   }
 
   /** Could be dest=comp or jump or dest=comp;jump */
-  final case class Destination(expr: String, machineCode: String)
-  final case class Computation(expr: String, machineCode: String)
-  final case class Jump(expr: String, machineCode: String)
+  case class Destination(expr: String, machineCode: String)
+  case class Computation(expr: String, machineCode: String)
+  case class Jump(expr: String, machineCode: String)
 
-  final case class CInstruction(dest: Destination, comp: Computation, jump: Jump) extends Instruction
+  case class CInstruction(dest: Destination, comp: Computation, jump: Jump) extends RealInstruction
 
   object CInstruction {
     val destinationsMap = Map(("" -> "000"), ("M" -> "001"), ("D" -> "010"), ("MD" -> "011"),
@@ -58,8 +66,47 @@ object I {
 }
 
 /** The parser. */
-final class Parser(symbolTable: SymbolTable) {
+class Parser(inputFile: File, symbolTable: SymbolTable) {
+  import Parser._
 
+  // FIRST PASS
+  buildSymbolTable()
+
+  private val br = Files.newBufferedReader(inputFile.toPath)
+
+  def next(): Option[I.RealInstruction] = {
+    Option(br.readLine()) match {
+      case None => { // end of input
+        br.close()
+        None
+      }
+      case Some(line) => FinalP.parse(line).get.value match {
+        case Some(i: I.RealInstruction) => Option(i)
+        case _ => next() // if not A or C, skip
+      }
+    }
+  }
+
+  private def buildSymbolTable(): Unit = {
+    val br = Files.newBufferedReader(inputFile.toPath)
+    var line: String = null
+    var realInstructionsCounter = 0
+    try {
+      while ({ line = br.readLine(); line != null }) {
+        FinalP.parse(line).get.value match {
+          case Some(I.SymbolInstruction(symbol)) => symbolTable.add(symbol, realInstructionsCounter)
+          case Some(_) => realInstructionsCounter += 1
+          case _ => // if empty line, or just a comment
+        }
+      }
+    } finally {
+      br.close()
+    }
+  }
+
+}
+
+object Parser {
   val Newline = P(StringIn("\r\n", "\n"))
   val Whitespace = P(" " | "\t" | Newline)
   val Comment = P("//" ~ AnyChar.rep ~ End)
@@ -95,30 +142,4 @@ final class Parser(symbolTable: SymbolTable) {
   /////// final stuff
   val Instruction: P[I.Instruction] = SymbolInstruction | AInstruction | CInstruction
   val FinalP = Whitespace.rep ~ Instruction.? ~ Whitespace.rep ~ Comment.?
-
-  /** @param lines List of lines of an .asm file
-    * @return List of instructions, A and C only!
-    */
-  def parse(lines: Seq[String]): Seq[I.Instruction] = {
-    val allInstructions = lines.flatMap { i =>
-      val res = FinalP.parse(i)
-      res.get.value
-    }
-
-    // 1. pass. Collect all LABEL Symbols and add them to SymbolTable
-    // @note 2. pass will be in CodeGenerator, where we check for user-declared variables
-    var realInstructionsCounter = 0 // counts REAL instructions (A and C)
-    val realInstructions = allInstructions.flatMap {
-      case s: I.SymbolInstruction => {
-        symbolTable.add(s.symbol, realInstructionsCounter) // refers to NEXT instruction ADDRESS         
-        None
-      }
-      case aOrCInstruction => {
-        realInstructionsCounter += 1
-        Option(aOrCInstruction)
-      }
-    }
-    realInstructions
-  }
-
 }

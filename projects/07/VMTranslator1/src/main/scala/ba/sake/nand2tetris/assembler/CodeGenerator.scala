@@ -84,7 +84,7 @@ final class CodeGenerator(outWriter: PrintWriter) {
         case I.PopInstruction(S.ConstSegment(), const) => // pop constant 5
           "" // no-operation !!!? makes no sense to POP something INTO a CONST.. :D
         case I.PopInstruction(S.OffsetSegment(base), index) =>
-            s"""
+          s"""
             |@$base
             |D=A
             |@$index
@@ -121,9 +121,33 @@ final class CodeGenerator(outWriter: PrintWriter) {
             |A=M           // indirect
             |M=D           // store to M[TEMP2], that is segment[index]
             |
-            |${decrStack()} // implementation detail, ignore this.. xD
+            |${decrStack()} // recover stack
             |""".stripMargin
 
+        case I.LabelInstruction(label) => 
+          s"""
+            |// label $label
+            |($label)
+            |""".stripMargin
+        case I.GotoInstruction(label) =>
+          s"""
+            |// goto $label
+            |@$label
+            |0;JMP
+            |""".stripMargin
+        case I.IfGotoInstruction(label) =>
+          s"""
+            |// if-goto $label
+            |${decrStack()}
+            |@${S.SP}
+            |A=M           // indirect access...
+            |D=M           // store in D
+            |
+            |@$label
+            |D;JNE
+            |""".stripMargin
+
+            // TODO popravit ovo incrStack.. :D
       }
 
       outWriter.write(assemblerInstruction)

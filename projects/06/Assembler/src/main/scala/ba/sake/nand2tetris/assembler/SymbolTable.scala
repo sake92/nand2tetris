@@ -1,10 +1,10 @@
 package ba.sake.nand2tetris.assembler
 
-final class SymbolTable {
+class SymbolTable {
 
   // default symbols are inserted immediately
-  private final val registers = (0 to 15).map(n => ("R" + n) -> n) // (R0 -> 0), (R1 -> 1) ...
-  var symbols = Map(
+  private val registers = (0 to 15).map(n => ("R" + n) -> n) // (R0 -> 0), (R1 -> 1) ...
+  private var symbols = Map(
     ("SP" -> 0), ("LCL" -> 1), ("ARG" -> 2), ("THIS" -> 3),
     ("THAT" -> 4), ("SCREEN" -> 16384), ("KBD" -> 24576)
   )

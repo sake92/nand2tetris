@@ -4,6 +4,12 @@ import scala.io.Source
 import java.io.File
 import java.io.PrintWriter
 import java.nio.charset.StandardCharsets
+import java.io.BufferedReader
+import java.io.FileReader
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+import java.io.RandomAccessFile
 
 object Main {
 
@@ -14,18 +20,19 @@ object Main {
     val Some((fileName, name)) = res
 
     val inputFile = new File(fileName)
-    val lines = Source.fromFile(inputFile).getLines.toVector
     val outputFile = new File(name + ".hack")
-    val outputWriter = new PrintWriter(outputFile, StandardCharsets.UTF_8.name)
+    val outWriter = new PrintWriter(outputFile, StandardCharsets.UTF_8.name)
 
     val symbolTable = new SymbolTable()
-    val parser = new Parser(symbolTable)
-    val codeGenerator = new CodeGenerator(symbolTable, outputWriter)
+    val parser = new Parser(inputFile, symbolTable)
+    val codeGenerator = new CodeGenerator(outWriter, symbolTable)
 
-    val instructions = parser.parse(lines)
-    val code = codeGenerator.generate(instructions)
+    var instruction: Option[I.RealInstruction] = null
+    while ({ instruction = parser.next(); instruction.isDefined }) {
+      codeGenerator.write(instruction.get)
+    }
 
-    outputWriter.close()
+    outWriter.close()
   }
 
   private def handleArgs(args: Array[String]): Option[(String, String)] = {
