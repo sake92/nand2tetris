@@ -1,227 +1,238 @@
-// instruction no. 0
-@3030       // load constant
-D=A           // store const in D
-@0      // get stack location
-A=M           // indirect access!
-M=D           // put const in stack
-@0
+/// push constant 3030 ///
+@3030
+D=A
+@SP
+A=M
+M=D
+// SP++
+@SP
 M=M+1
 
-// instruction no. 1
-@3
+/// pop pointer 0 ///
+@THIS
 D=A
 @0
-D=D+A         // address is now set
-@6
-M=D           // store address in TEMP2 register, temporarily
+D=D+A          
+@R13
+M=D            
 
-@0
+// SP--
+@SP
 M=M-1
-@0
-A=M           // indirect access...
-D=M           // store in D
 
-@6
-A=M           // indirect
-M=D           // store to M[TEMP2], that is segment[index]
+@SP
+A=M
+D=M           
 
-@0
-M=M-1 // implementation detail, ignore this.. xD
-@0
+@R13
+A=M
+M=D           
+/// push constant 3040 ///
+@3040
+D=A
+@SP
+A=M
+M=D
+// SP++
+@SP
 M=M+1
 
-// instruction no. 2
-@3040       // load constant
-D=A           // store const in D
-@0      // get stack location
-A=M           // indirect access!
-M=D           // put const in stack
-@0
-M=M+1
-
-// instruction no. 3
-@3
+/// pop pointer 1 ///
+@THIS
 D=A
 @1
-D=D+A         // address is now set
-@6
-M=D           // store address in TEMP2 register, temporarily
+D=D+A          
+@R13
+M=D            
 
-@0
+// SP--
+@SP
 M=M-1
-@0
-A=M           // indirect access...
-D=M           // store in D
 
-@6
-A=M           // indirect
-M=D           // store to M[TEMP2], that is segment[index]
+@SP
+A=M
+D=M           
 
-@0
-M=M-1 // implementation detail, ignore this.. xD
-@0
+@R13
+A=M
+M=D           
+/// push constant 32 ///
+@32
+D=A
+@SP
+A=M
+M=D
+// SP++
+@SP
 M=M+1
 
-// instruction no. 4
-@32       // load constant
-D=A           // store const in D
-@0      // get stack location
-A=M           // indirect access!
-M=D           // put const in stack
-@0
-M=M+1
-
-// instruction no. 5
-@3
-D=M           // indirect access...
+/// pop this 2 ///
+@THIS
+D=M
 @2
-D=D+A         // address is now set
-@6
-M=D           // store address in TEMP2 register, temporarily
+D=D+A          
+@R13
+M=D            
 
-@0
+// SP--
+@SP
 M=M-1
-@0
-A=M           // indirect access...
-D=M           // store in D
 
-@6
-A=M           // indirect
-M=D           // store to M[TEMP2], that is segment[index]
+@SP
+A=M
+D=M           
 
-@0
-M=M-1 // implementation detail, ignore this.. xD
-@0
+@R13
+A=M
+M=D           
+/// push constant 46 ///
+@46
+D=A
+@SP
+A=M
+M=D
+// SP++
+@SP
 M=M+1
 
-// instruction no. 6
-@46       // load constant
-D=A           // store const in D
-@0      // get stack location
-A=M           // indirect access!
-M=D           // put const in stack
-@0
-M=M+1
-
-// instruction no. 7
-@4
-D=M           // indirect access...
+/// pop that 6 ///
+@THAT
+D=M
 @6
-D=D+A         // address is now set
-@6
-M=D           // store address in TEMP2 register, temporarily
+D=D+A          
+@R13
+M=D            
 
-@0
+// SP--
+@SP
 M=M-1
-@0
-A=M           // indirect access...
-D=M           // store in D
 
-@6
-A=M           // indirect
-M=D           // store to M[TEMP2], that is segment[index]
+@SP
+A=M
+D=M           
 
-@0
-M=M-1 // implementation detail, ignore this.. xD
-@0
-M=M+1
-
-// instruction no. 8
-@3
+@R13
+A=M
+M=D           
+/// push pointer 0 ///
+@THIS
 D=A
 @0
-A=D+A         // here we DIRECTLY SUM base(offset) and index(offset from base address...)
-D=M           // now in D is the value of segment[index]
+A=D+A
+D=M
 
-@0      // get stack location
-A=M           // indirect access!
-M=D           // put segment[index] on stack
-@0
+@SP
+A=M 
+M=D       
+// SP++
+@SP
 M=M+1
 
-// instruction no. 9
-@3
+/// push pointer 1 ///
+@THIS
 D=A
 @1
-A=D+A         // here we DIRECTLY SUM base(offset) and index(offset from base address...)
-D=M           // now in D is the value of segment[index]
+A=D+A
+D=M
 
-@0      // get stack location
-A=M           // indirect access!
-M=D           // put segment[index] on stack
-@0
+@SP
+A=M 
+M=D       
+// SP++
+@SP
 M=M+1
 
-// instruction no. 10
-@0
+/// add ///
+// SP--
+@SP
 M=M-1
-@0
-A=M             // indirect access...
-D=M             // store first argument in D
 
-@0
-M=M-1
-@0
+@SP
 A=M
-M=M+D        // do the operation and store in second arg
-@0
+D=M           
+
+// SP--
+@SP
+M=M-1
+
+@SP
+A=M
+
+M=M+D      
+
+// SP++
+@SP
 M=M+1
 
-// instruction no. 11
-@3
-D=M           // indirect access...
-
+/// push this 2 ///
+@THIS
+D=M
 @2
 A=D+A
-D=M           // now in D is the value of segment[index]
+D=M
 
-@0      // get stack location
-A=M           // indirect access!
-M=D           // put segment[index] on stack
-@0
+@SP
+A=M 
+M=D       
+// SP++
+@SP
 M=M+1
 
-// instruction no. 12
-@0
+/// sub ///
+// SP--
+@SP
 M=M-1
-@0
-A=M             // indirect access...
-D=M             // store first argument in D
 
-@0
-M=M-1
-@0
+@SP
 A=M
-M=M-D        // do the operation and store in second arg
-@0
+D=M           
+
+// SP--
+@SP
+M=M-1
+
+@SP
+A=M
+
+M=M-D      
+
+// SP++
+@SP
 M=M+1
 
-// instruction no. 13
-@4
-D=M           // indirect access...
-
+/// push that 6 ///
+@THAT
+D=M
 @6
 A=D+A
-D=M           // now in D is the value of segment[index]
+D=M
 
-@0      // get stack location
-A=M           // indirect access!
-M=D           // put segment[index] on stack
-@0
+@SP
+A=M 
+M=D       
+// SP++
+@SP
 M=M+1
 
-// instruction no. 14
-@0
+/// add ///
+// SP--
+@SP
 M=M-1
-@0
-A=M             // indirect access...
-D=M             // store first argument in D
 
-@0
-M=M-1
-@0
+@SP
 A=M
-M=M+D        // do the operation and store in second arg
-@0
+D=M           
+
+// SP--
+@SP
+M=M-1
+
+@SP
+A=M
+
+M=M+D      
+
+// SP++
+@SP
 M=M+1
 

@@ -1,9 +1,11 @@
 package ba.sake.nand2tetris.assembler
 
 import java.io.BufferedReader
+import java.io.ByteArrayInputStream
 import java.io.File
-import java.io.InputStream
+import java.io.InputStreamReader
 import java.nio.file.Files
+
 import fastparse.all._
 
 /** Instructions AST */
@@ -65,19 +67,23 @@ object I {
   }
 }
 
-/** The parser. */
-class Parser(inputFile: File, symbolTable: SymbolTable) {
+/**
+ * The parser.
+ * @param br1 BR for first pass, picking labels
+ * @param br2 BR for second pass, parsing
+ */
+class Parser(br1: BufferedReader, br2: BufferedReader, symbolTable: SymbolTable) {
   import Parser._
 
   // FIRST PASS
   buildSymbolTable()
 
-  private val br = Files.newBufferedReader(inputFile.toPath)
-
+  // SECOND PASS, iterated from main
+  // TODO handle FAILURE CASE when parsing!
   def next(): Option[I.RealInstruction] = {
-    Option(br.readLine()) match {
+    Option(br2.readLine()) match {
       case None => { // end of input
-        br.close()
+        br1.close()
         None
       }
       case Some(line) => FinalP.parse(line).get.value match {
@@ -88,11 +94,10 @@ class Parser(inputFile: File, symbolTable: SymbolTable) {
   }
 
   private def buildSymbolTable(): Unit = {
-    val br = Files.newBufferedReader(inputFile.toPath)
     var line: String = null
     var realInstructionsCounter = 0
     try {
-      while ({ line = br.readLine(); line != null }) {
+      while ({ line = br1.readLine(); line != null }) {
         FinalP.parse(line).get.value match {
           case Some(I.SymbolInstruction(symbol)) => symbolTable.add(symbol, realInstructionsCounter)
           case Some(_) => realInstructionsCounter += 1
@@ -100,13 +105,27 @@ class Parser(inputFile: File, symbolTable: SymbolTable) {
         }
       }
     } finally {
-      br.close()
+      br1.close()
     }
   }
 
+  def close(): Unit = {
+    br2.close()
+  }
 }
 
 object Parser {
+
+  def apply(inputFile: File, symbolTable: SymbolTable): Parser = {
+    val br1, br2 = Files.newBufferedReader(inputFile.toPath())
+    new Parser(br1, br2, symbolTable)
+  }
+
+  def apply(inputString: String, symbolTable: SymbolTable): Parser = {
+    val br1, br2 = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(inputString.getBytes)))
+    new Parser(br1, br2, symbolTable)
+  }
+
   val Newline = P(StringIn("\r\n", "\n"))
   val Whitespace = P(" " | "\t" | Newline)
   val Comment = P("//" ~ AnyChar.rep ~ End)

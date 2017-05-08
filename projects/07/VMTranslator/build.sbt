@@ -1,6 +1,6 @@
 organization := "ba.sake"
 
-name := "hack-VMTranslator1"
+name := "Hack-VMTranslator"
 
 version := "0.0.0-SNAPSHOT"
 

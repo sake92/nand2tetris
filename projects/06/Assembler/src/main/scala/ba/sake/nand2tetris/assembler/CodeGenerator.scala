@@ -1,10 +1,11 @@
 package ba.sake.nand2tetris.assembler
 
-import java.io.PrintWriter
 import java.io.File
 import java.nio.charset.StandardCharsets
+import java.io.Writer
+import java.io.PrintWriter
 
-class CodeGenerator(outWriter: PrintWriter, symbolTable: SymbolTable) {
+class CodeGenerator(outWriter: Writer, symbolTable: SymbolTable) {
 
   def write(instruction: I.RealInstruction): Unit = {
     val res: String = instruction match {
@@ -34,4 +35,27 @@ class CodeGenerator(outWriter: PrintWriter, symbolTable: SymbolTable) {
     "0" + padZeros + binaryValue
   }
 
+  def close(): Unit = {
+    outWriter.close()
+  }
+}
+
+object CodeGenerator {
+
+  // print to file
+  def apply(outputFile: File, symbolTable: SymbolTable): CodeGenerator = {
+    val outWriter = new PrintWriter(outputFile, StandardCharsets.UTF_8.name)
+    new CodeGenerator(outWriter, symbolTable)
+  }
+
+  // print to a Writer, e.g. a string for debugging
+  def apply(outWriter: Writer, symbolTable: SymbolTable): CodeGenerator = {
+    new CodeGenerator(outWriter, symbolTable)
+  }
+
+  // print to console
+  def apply(symbolTable: SymbolTable): CodeGenerator = {
+    val outWriter = new PrintWriter(System.out)
+    new CodeGenerator(outWriter, symbolTable)
+  }
 }

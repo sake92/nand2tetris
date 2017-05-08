@@ -1,165 +1,173 @@
-// instruction no. 0
-@111       // load constant
-D=A           // store const in D
-@0      // get stack location
-A=M           // indirect access!
-M=D           // put const in stack
-@0
-M=M+1
-
-// instruction no. 1
-@333       // load constant
-D=A           // store const in D
-@0      // get stack location
-A=M           // indirect access!
-M=D           // put const in stack
-@0
-M=M+1
-
-// instruction no. 2
-@888       // load constant
-D=A           // store const in D
-@0      // get stack location
-A=M           // indirect access!
-M=D           // put const in stack
-@0
-M=M+1
-
-// instruction no. 3
-@16
+/// push constant 111 ///
+@111
 D=A
-@8
-D=D+A         // address is now set
-@6
-M=D           // store address in TEMP2 register, temporarily
-
-@0
-M=M-1
-@0
-A=M           // indirect access...
-D=M           // store in D
-
-@6
-A=M           // indirect
-M=D           // store to M[TEMP2], that is segment[index]
-
-@0
-M=M-1 // implementation detail, ignore this.. xD
-@0
-M=M+1
-
-// instruction no. 4
-@16
-D=A
-@3
-D=D+A         // address is now set
-@6
-M=D           // store address in TEMP2 register, temporarily
-
-@0
-M=M-1
-@0
-A=M           // indirect access...
-D=M           // store in D
-
-@6
-A=M           // indirect
-M=D           // store to M[TEMP2], that is segment[index]
-
-@0
-M=M-1 // implementation detail, ignore this.. xD
-@0
-M=M+1
-
-// instruction no. 5
-@16
-D=A
-@1
-D=D+A         // address is now set
-@6
-M=D           // store address in TEMP2 register, temporarily
-
-@0
-M=M-1
-@0
-A=M           // indirect access...
-D=M           // store in D
-
-@6
-A=M           // indirect
-M=D           // store to M[TEMP2], that is segment[index]
-
-@0
-M=M-1 // implementation detail, ignore this.. xD
-@0
-M=M+1
-
-// instruction no. 6
-@16
-D=A
-@3
-A=D+A         // here we DIRECTLY SUM base(offset) and index(offset from base address...)
-D=M           // now in D is the value of segment[index]
-
-@0      // get stack location
-A=M           // indirect access!
-M=D           // put segment[index] on stack
-@0
-M=M+1
-
-// instruction no. 7
-@16
-D=A
-@1
-A=D+A         // here we DIRECTLY SUM base(offset) and index(offset from base address...)
-D=M           // now in D is the value of segment[index]
-
-@0      // get stack location
-A=M           // indirect access!
-M=D           // put segment[index] on stack
-@0
-M=M+1
-
-// instruction no. 8
-@0
-M=M-1
-@0
-A=M             // indirect access...
-D=M             // store first argument in D
-
-@0
-M=M-1
-@0
+@SP
 A=M
-M=M-D        // do the operation and store in second arg
-@0
+M=D
+// SP++
+@SP
 M=M+1
 
-// instruction no. 9
-@16
+/// push constant 333 ///
+@333
 D=A
-@8
-A=D+A         // here we DIRECTLY SUM base(offset) and index(offset from base address...)
-D=M           // now in D is the value of segment[index]
-
-@0      // get stack location
-A=M           // indirect access!
-M=D           // put segment[index] on stack
-@0
+@SP
+A=M
+M=D
+// SP++
+@SP
 M=M+1
 
-// instruction no. 10
-@0
-M=M-1
-@0
-A=M             // indirect access...
-D=M             // store first argument in D
-
-@0
-M=M-1
-@0
+/// push constant 888 ///
+@888
+D=A
+@SP
 A=M
-M=M+D        // do the operation and store in second arg
-@0
+M=D
+// SP++
+@SP
+M=M+1
+
+/// pop static 8 ///
+@test.8
+D=M
+@8
+D=D+A          
+@R13
+M=D            
+
+// SP--
+@SP
+M=M-1
+
+@SP
+A=M
+D=M           
+
+@R13
+A=M
+M=D           
+/// pop static 3 ///
+@test.3
+D=M
+@3
+D=D+A          
+@R13
+M=D            
+
+// SP--
+@SP
+M=M-1
+
+@SP
+A=M
+D=M           
+
+@R13
+A=M
+M=D           
+/// pop static 1 ///
+@test.1
+D=M
+@1
+D=D+A          
+@R13
+M=D            
+
+// SP--
+@SP
+M=M-1
+
+@SP
+A=M
+D=M           
+
+@R13
+A=M
+M=D           
+/// push static 3 ///
+@test.3
+D=M
+@3
+A=D+A
+D=M
+
+@SP
+A=M 
+M=D       
+// SP++
+@SP
+M=M+1
+
+/// push static 1 ///
+@test.1
+D=M
+@1
+A=D+A
+D=M
+
+@SP
+A=M 
+M=D       
+// SP++
+@SP
+M=M+1
+
+/// sub ///
+// SP--
+@SP
+M=M-1
+
+@SP
+A=M
+D=M           
+
+// SP--
+@SP
+M=M-1
+
+@SP
+A=M
+
+M=M-D      
+
+// SP++
+@SP
+M=M+1
+
+/// push static 8 ///
+@test.8
+D=M
+@8
+A=D+A
+D=M
+
+@SP
+A=M 
+M=D       
+// SP++
+@SP
+M=M+1
+
+/// add ///
+// SP--
+@SP
+M=M-1
+
+@SP
+A=M
+D=M           
+
+// SP--
+@SP
+M=M-1
+
+@SP
+A=M
+
+M=M+D      
+
+// SP++
+@SP
 M=M+1
 

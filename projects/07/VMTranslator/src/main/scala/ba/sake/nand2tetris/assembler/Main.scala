@@ -1,15 +1,6 @@
-package ba.sake.nand2tetris.assembler
+package ba.sake.nand2tetris.vmtranslator
 
-import scala.io.Source
 import java.io.File
-import java.io.PrintWriter
-import java.nio.charset.StandardCharsets
-import java.io.BufferedReader
-import java.io.FileReader
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
-import java.io.RandomAccessFile
 
 object Main {
 
@@ -22,13 +13,12 @@ object Main {
     val inputFile = new File(fileName)
     val outputFile = new File(name + ".hack")
 
-    val symbolTable = new SymbolTable()
-    val parser = Parser(inputFile, symbolTable)
-    val codeGenerator = CodeGenerator(outputFile, symbolTable)
+    val parser = Parser(inputFile)
+    val codeGenerator = CodeGenerator(outputFile)
 
-    var instruction: Option[I.RealInstruction] = null
+    var instruction: Option[I.Instruction] = null
     while ({ instruction = parser.next(); instruction.isDefined }) {
-      codeGenerator.write(instruction.get)
+      codeGenerator.write(instruction.get, name)
     }
 
     parser.close()
@@ -49,13 +39,14 @@ object Main {
       val (name, ext) = fileName.splitAt(fileName.length - 4)
       println("NAME: " + name)
       println("ext: " + ext)
-      if (ext != ".asm") {
-        println("File must have '.asm' extension!")
+      if (ext != ".vm") {
+        println("File must have '.vm' extension!")
         None
       } else {
         Option(fileName, name)
       }
     }
+
   }
 
 }
