@@ -25,7 +25,7 @@ M=M-1
 
 @SP
 A=M
-D=M          
+D=M
 
 // SP--
 @SP
@@ -33,13 +33,13 @@ M=M-1
 
 @SP
 A=M
-D=M-D         
+D=M-D
 
 @TRUE0
-D;JEQ  
+D;JEQ
 @SP
 A=M
-M=0  
+M=0
 @END0
 0;JMP
 
@@ -80,7 +80,7 @@ M=M-1
 
 @SP
 A=M
-D=M          
+D=M
 
 // SP--
 @SP
@@ -88,13 +88,13 @@ M=M-1
 
 @SP
 A=M
-D=M-D         
+D=M-D
 
 @TRUE1
-D;JEQ  
+D;JEQ
 @SP
 A=M
-M=0  
+M=0
 @END1
 0;JMP
 
@@ -135,7 +135,7 @@ M=M-1
 
 @SP
 A=M
-D=M          
+D=M
 
 // SP--
 @SP
@@ -143,13 +143,13 @@ M=M-1
 
 @SP
 A=M
-D=M-D         
+D=M-D
 
 @TRUE2
-D;JEQ  
+D;JEQ
 @SP
 A=M
-M=0  
+M=0
 @END2
 0;JMP
 
@@ -190,7 +190,7 @@ M=M-1
 
 @SP
 A=M
-D=M          
+D=M
 
 // SP--
 @SP
@@ -198,13 +198,13 @@ M=M-1
 
 @SP
 A=M
-D=M-D         
+D=M-D
 
 @TRUE3
-D;JLT  
+D;JLT
 @SP
 A=M
-M=0  
+M=0
 @END3
 0;JMP
 
@@ -245,7 +245,7 @@ M=M-1
 
 @SP
 A=M
-D=M          
+D=M
 
 // SP--
 @SP
@@ -253,13 +253,13 @@ M=M-1
 
 @SP
 A=M
-D=M-D         
+D=M-D
 
 @TRUE4
-D;JLT  
+D;JLT
 @SP
 A=M
-M=0  
+M=0
 @END4
 0;JMP
 
@@ -300,7 +300,7 @@ M=M-1
 
 @SP
 A=M
-D=M          
+D=M
 
 // SP--
 @SP
@@ -308,13 +308,13 @@ M=M-1
 
 @SP
 A=M
-D=M-D         
+D=M-D
 
 @TRUE5
-D;JLT  
+D;JLT
 @SP
 A=M
-M=0  
+M=0
 @END5
 0;JMP
 
@@ -355,7 +355,7 @@ M=M-1
 
 @SP
 A=M
-D=M          
+D=M
 
 // SP--
 @SP
@@ -363,13 +363,13 @@ M=M-1
 
 @SP
 A=M
-D=M-D         
+D=M-D
 
 @TRUE6
-D;JGT  
+D;JGT
 @SP
 A=M
-M=0  
+M=0
 @END6
 0;JMP
 
@@ -410,7 +410,7 @@ M=M-1
 
 @SP
 A=M
-D=M          
+D=M
 
 // SP--
 @SP
@@ -418,13 +418,13 @@ M=M-1
 
 @SP
 A=M
-D=M-D         
+D=M-D
 
 @TRUE7
-D;JGT  
+D;JGT
 @SP
 A=M
-M=0  
+M=0
 @END7
 0;JMP
 
@@ -465,7 +465,7 @@ M=M-1
 
 @SP
 A=M
-D=M          
+D=M
 
 // SP--
 @SP
@@ -473,13 +473,13 @@ M=M-1
 
 @SP
 A=M
-D=M-D         
+D=M-D
 
 @TRUE8
-D;JGT  
+D;JGT
 @SP
 A=M
-M=0  
+M=0
 @END8
 0;JMP
 
@@ -530,7 +530,7 @@ M=M-1
 
 @SP
 A=M
-D=M           
+D=M
 
 // SP--
 @SP
@@ -539,7 +539,7 @@ M=M-1
 @SP
 A=M
 
-M=M+D      
+M=M+D
 
 // SP++
 @SP
@@ -562,7 +562,7 @@ M=M-1
 
 @SP
 A=M
-D=M           
+D=M
 
 // SP--
 @SP
@@ -571,7 +571,7 @@ M=M-1
 @SP
 A=M
 
-M=M-D      
+M=M-D
 
 // SP++
 @SP
@@ -597,7 +597,7 @@ M=M-1
 
 @SP
 A=M
-D=M           
+D=M
 
 // SP--
 @SP
@@ -606,7 +606,7 @@ M=M-1
 @SP
 A=M
 
-M=M&D      
+M=M&D
 
 // SP++
 @SP
@@ -629,7 +629,7 @@ M=M-1
 
 @SP
 A=M
-D=M           
+D=M
 
 // SP--
 @SP
@@ -638,7 +638,7 @@ M=M-1
 @SP
 A=M
 
-M=M|D      
+M=M|D
 
 // SP++
 @SP

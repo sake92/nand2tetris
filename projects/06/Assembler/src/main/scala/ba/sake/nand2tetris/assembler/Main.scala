@@ -17,10 +17,8 @@ object Main {
 
     val res = handleArgs(args)
     if (res.isEmpty) return
-    val Some((fileName, name)) = res
-
-    val inputFile = new File(fileName)
-    val outputFile = new File(name + ".hack")
+    
+    val Some((inputFile, outputFile)) = res
 
     val symbolTable = new SymbolTable()
     val parser = Parser(inputFile, symbolTable)
@@ -35,7 +33,10 @@ object Main {
     codeGenerator.close()
   }
 
-  private def handleArgs(args: Array[String]): Option[(String, String)] = {
+  /**
+   * @return Optional tuple (inputFile, outputFile)
+   */
+  private def handleArgs(args: Array[String]): Option[(File, File)] = {
     if (args.length < 1) {
       println("You must provide a file name!")
       None
@@ -53,7 +54,8 @@ object Main {
         println("File must have '.asm' extension!")
         None
       } else {
-        Option(fileName, name)
+        val inputFile = new File(fileName)
+        Option((inputFile, new File(inputFile.getParent, name + ".hack")))
       }
     }
   }

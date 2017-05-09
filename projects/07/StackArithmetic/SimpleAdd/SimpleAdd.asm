@@ -25,7 +25,7 @@ M=M-1
 
 @SP
 A=M
-D=M           
+D=M
 
 // SP--
 @SP
@@ -34,7 +34,7 @@ M=M-1
 @SP
 A=M
 
-M=M+D      
+M=M+D
 
 // SP++
 @SP

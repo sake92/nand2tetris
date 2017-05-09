@@ -12,9 +12,9 @@ M=M+1
 @THIS
 D=A
 @0
-D=D+A          
+D=D+A
 @R13
-M=D            
+M=D
 
 // SP--
 @SP
@@ -22,11 +22,12 @@ M=M-1
 
 @SP
 A=M
-D=M           
+D=M
 
 @R13
 A=M
-M=D           
+M=D
+
 /// push constant 3040 ///
 @3040
 D=A
@@ -41,9 +42,9 @@ M=M+1
 @THIS
 D=A
 @1
-D=D+A          
+D=D+A
 @R13
-M=D            
+M=D
 
 // SP--
 @SP
@@ -51,11 +52,12 @@ M=M-1
 
 @SP
 A=M
-D=M           
+D=M
 
 @R13
 A=M
-M=D           
+M=D
+
 /// push constant 32 ///
 @32
 D=A
@@ -70,9 +72,9 @@ M=M+1
 @THIS
 D=M
 @2
-D=D+A          
+D=D+A
 @R13
-M=D            
+M=D
 
 // SP--
 @SP
@@ -80,11 +82,12 @@ M=M-1
 
 @SP
 A=M
-D=M           
+D=M
 
 @R13
 A=M
-M=D           
+M=D
+
 /// push constant 46 ///
 @46
 D=A
@@ -99,9 +102,9 @@ M=M+1
 @THAT
 D=M
 @6
-D=D+A          
+D=D+A
 @R13
-M=D            
+M=D
 
 // SP--
 @SP
@@ -109,11 +112,12 @@ M=M-1
 
 @SP
 A=M
-D=M           
+D=M
 
 @R13
 A=M
-M=D           
+M=D
+
 /// push pointer 0 ///
 @THIS
 D=A
@@ -122,8 +126,8 @@ A=D+A
 D=M
 
 @SP
-A=M 
-M=D       
+A=M
+M=D
 // SP++
 @SP
 M=M+1
@@ -136,8 +140,8 @@ A=D+A
 D=M
 
 @SP
-A=M 
-M=D       
+A=M
+M=D
 // SP++
 @SP
 M=M+1
@@ -149,7 +153,7 @@ M=M-1
 
 @SP
 A=M
-D=M           
+D=M
 
 // SP--
 @SP
@@ -158,7 +162,7 @@ M=M-1
 @SP
 A=M
 
-M=M+D      
+M=M+D
 
 // SP++
 @SP
@@ -172,8 +176,8 @@ A=D+A
 D=M
 
 @SP
-A=M 
-M=D       
+A=M
+M=D
 // SP++
 @SP
 M=M+1
@@ -185,7 +189,7 @@ M=M-1
 
 @SP
 A=M
-D=M           
+D=M
 
 // SP--
 @SP
@@ -194,7 +198,7 @@ M=M-1
 @SP
 A=M
 
-M=M-D      
+M=M-D
 
 // SP++
 @SP
@@ -208,8 +212,8 @@ A=D+A
 D=M
 
 @SP
-A=M 
-M=D       
+A=M
+M=D
 // SP++
 @SP
 M=M+1
@@ -221,7 +225,7 @@ M=M-1
 
 @SP
 A=M
-D=M           
+D=M
 
 // SP--
 @SP
@@ -230,7 +234,7 @@ M=M-1
 @SP
 A=M
 
-M=M+D      
+M=M+D
 
 // SP++
 @SP

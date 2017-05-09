@@ -22,7 +22,7 @@ set RAM[314] 300,
 set RAM[315] 3010,
 set RAM[316] 4010,
 
-repeat 300 {
+repeat 400 {
   ticktock;
 }
 

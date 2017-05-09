@@ -10,20 +10,16 @@ object VMTranslatorTest {
 
   val vmProgram =
     """
-push constant 0    
-pop local 0         // initializes sum = 0
-label LOOP_START
-push argument 0    
+function SimpleFunction.test 2
 push local 0
+push local 1
 add
-pop local 0	        // sum = sum + counter
+not
 push argument 0
-push constant 1
+add
+push argument 1
 sub
-pop argument 0      // counter--
-push argument 0
-if-goto LOOP_START  // If counter > 0, goto LOOP_START
-push local 0
+return
 
       """
 
@@ -31,9 +27,12 @@ push local 0
     val parser = Parser(vmProgram)
     val codeGenerator = CodeGenerator() // write to console
 
+    val fileName = "test"
+    codeGenerator.writeBootstrap(fileName)
+
     var instruction: Option[I.Instruction] = null
     while ({ instruction = parser.next(); instruction.isDefined }) {
-      codeGenerator.write(instruction.get, "test")
+      codeGenerator.write(instruction.get, fileName)
     }
 
     parser.close()

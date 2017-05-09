@@ -67,7 +67,7 @@ object I {
 
   /* Function Calling instructions */
   case class FunctionDeclarationInstruction(raw: String, name: String, numLocalVars: Long) extends Instruction
-  case class FunctionCallInstruction(raw: String, name: String, numLocalVars: Long) extends Instruction
+  case class FunctionCallInstruction(raw: String, name: String, numArgs: Long) extends Instruction
   case class ReturnInstruction(raw: String) extends Instruction
 }
 
@@ -160,10 +160,19 @@ object Parser {
     label => I.IfGotoInstruction(s"if-goto $label", label)
   }
 
+  val FunctionDeclarationInstruction = P("function" ~ Whitespace.rep(min = 1) ~ Symbol ~ Whitespace.rep(min = 1) ~ Number).map {
+    case (name, numLocalVars) => I.FunctionDeclarationInstruction(s"function $name $numLocalVars", name, numLocalVars)
+  }
+  val FunctionCallInstruction = P("call" ~ Whitespace.rep(min = 1) ~ Symbol ~ Whitespace.rep(min = 1) ~ Number).map {
+    case (name, numArgs) => I.FunctionCallInstruction(s"call $name $numArgs", name, numArgs)
+  }
+  val ReturnInstruction = P("return").map(_ => I.ReturnInstruction("return"))
+
   val Instruction: P[I.Instruction] = AddInstruction | SubInstruction | NegInstruction |
     EqInstruction | GtInstruction | LtInstruction | AndInstruction |
     OrInstruction | NotInstruction | PushInstruction | PopInstruction |
-    LabelInstruction | GotoInstruction | IfGotoInstruction
+    LabelInstruction | GotoInstruction | IfGotoInstruction |
+    FunctionDeclarationInstruction | FunctionCallInstruction | ReturnInstruction
 
   val FinalP = Whitespace.rep ~ Instruction.? ~ Whitespace.rep ~ Comment.?
 }

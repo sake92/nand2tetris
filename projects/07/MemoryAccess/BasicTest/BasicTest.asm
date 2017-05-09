@@ -12,9 +12,9 @@ M=M+1
 @LCL
 D=M
 @0
-D=D+A          
+D=D+A
 @R13
-M=D            
+M=D
 
 // SP--
 @SP
@@ -22,11 +22,12 @@ M=M-1
 
 @SP
 A=M
-D=M           
+D=M
 
 @R13
 A=M
-M=D           
+M=D
+
 /// push constant 21 ///
 @21
 D=A
@@ -51,9 +52,9 @@ M=M+1
 @ARG
 D=M
 @2
-D=D+A          
+D=D+A
 @R13
-M=D            
+M=D
 
 // SP--
 @SP
@@ -61,18 +62,19 @@ M=M-1
 
 @SP
 A=M
-D=M           
+D=M
 
 @R13
 A=M
-M=D           
+M=D
+
 /// pop argument 1 ///
 @ARG
 D=M
 @1
-D=D+A          
+D=D+A
 @R13
-M=D            
+M=D
 
 // SP--
 @SP
@@ -80,11 +82,12 @@ M=M-1
 
 @SP
 A=M
-D=M           
+D=M
 
 @R13
 A=M
-M=D           
+M=D
+
 /// push constant 36 ///
 @36
 D=A
@@ -99,9 +102,9 @@ M=M+1
 @THIS
 D=M
 @6
-D=D+A          
+D=D+A
 @R13
-M=D            
+M=D
 
 // SP--
 @SP
@@ -109,11 +112,12 @@ M=M-1
 
 @SP
 A=M
-D=M           
+D=M
 
 @R13
 A=M
-M=D           
+M=D
+
 /// push constant 42 ///
 @42
 D=A
@@ -138,9 +142,9 @@ M=M+1
 @THAT
 D=M
 @5
-D=D+A          
+D=D+A
 @R13
-M=D            
+M=D
 
 // SP--
 @SP
@@ -148,18 +152,19 @@ M=M-1
 
 @SP
 A=M
-D=M           
+D=M
 
 @R13
 A=M
-M=D           
+M=D
+
 /// pop that 2 ///
 @THAT
 D=M
 @2
-D=D+A          
+D=D+A
 @R13
-M=D            
+M=D
 
 // SP--
 @SP
@@ -167,11 +172,12 @@ M=M-1
 
 @SP
 A=M
-D=M           
+D=M
 
 @R13
 A=M
-M=D           
+M=D
+
 /// push constant 510 ///
 @510
 D=A
@@ -186,9 +192,9 @@ M=M+1
 @R5
 D=A
 @6
-D=D+A          
+D=D+A
 @R13
-M=D            
+M=D
 
 // SP--
 @SP
@@ -196,11 +202,12 @@ M=M-1
 
 @SP
 A=M
-D=M           
+D=M
 
 @R13
 A=M
-M=D           
+M=D
+
 /// push local 0 ///
 @LCL
 D=M
@@ -209,8 +216,8 @@ A=D+A
 D=M
 
 @SP
-A=M 
-M=D       
+A=M
+M=D
 // SP++
 @SP
 M=M+1
@@ -223,8 +230,8 @@ A=D+A
 D=M
 
 @SP
-A=M 
-M=D       
+A=M
+M=D
 // SP++
 @SP
 M=M+1
@@ -236,7 +243,7 @@ M=M-1
 
 @SP
 A=M
-D=M           
+D=M
 
 // SP--
 @SP
@@ -245,7 +252,7 @@ M=M-1
 @SP
 A=M
 
-M=M+D      
+M=M+D
 
 // SP++
 @SP
@@ -259,8 +266,8 @@ A=D+A
 D=M
 
 @SP
-A=M 
-M=D       
+A=M
+M=D
 // SP++
 @SP
 M=M+1
@@ -272,7 +279,7 @@ M=M-1
 
 @SP
 A=M
-D=M           
+D=M
 
 // SP--
 @SP
@@ -281,7 +288,7 @@ M=M-1
 @SP
 A=M
 
-M=M-D      
+M=M-D
 
 // SP++
 @SP
@@ -295,8 +302,8 @@ A=D+A
 D=M
 
 @SP
-A=M 
-M=D       
+A=M
+M=D
 // SP++
 @SP
 M=M+1
@@ -309,8 +316,8 @@ A=D+A
 D=M
 
 @SP
-A=M 
-M=D       
+A=M
+M=D
 // SP++
 @SP
 M=M+1
@@ -322,7 +329,7 @@ M=M-1
 
 @SP
 A=M
-D=M           
+D=M
 
 // SP--
 @SP
@@ -331,7 +338,7 @@ M=M-1
 @SP
 A=M
 
-M=M+D      
+M=M+D
 
 // SP++
 @SP
@@ -344,7 +351,7 @@ M=M-1
 
 @SP
 A=M
-D=M           
+D=M
 
 // SP--
 @SP
@@ -353,7 +360,7 @@ M=M-1
 @SP
 A=M
 
-M=M-D      
+M=M-D
 
 // SP++
 @SP
@@ -367,8 +374,8 @@ A=D+A
 D=M
 
 @SP
-A=M 
-M=D       
+A=M
+M=D
 // SP++
 @SP
 M=M+1
@@ -380,7 +387,7 @@ M=M-1
 
 @SP
 A=M
-D=M           
+D=M
 
 // SP--
 @SP
@@ -389,7 +396,7 @@ M=M-1
 @SP
 A=M
 
-M=M+D      
+M=M+D
 
 // SP++
 @SP
