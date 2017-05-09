@@ -1,10 +1,10 @@
 Implementation tips:
 
 1. Tests under folder `ProgramFlow` and `FunctionCalls/SimpleFunction` test are **standalone** VM files.  
-This means that NO BOOTSTRAP CODE is required! (You'll get an error!)
+This means that NO BOOTSTRAP CODE is required! (You'll get an error otherwise!)
 
-2. Tests under folder `FunctionCalls` except `SimpleFunction` DO REQUIrE BOOTSTRAP CODE!  
-And they are treated as **folder** of VM files. You should generate just one big ASM file! :)
+2. Tests under folder `FunctionCalls` except `SimpleFunction` DO REQUIRE BOOTSTRAP CODE!  
+And they are treated as **folders** of VM files. You should generate just one big ASM file! :)
 
 Good luck!
 
