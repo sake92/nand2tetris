@@ -1,0 +1,8 @@
+projects/**/*.tst linguist-vendored
+projects/**/*.cmp linguist-vendored
+projects/**/*.out linguist-vendored
+projects/**/*.hdl linguist-vendored
+projects/**/*.hack linguist-vendored
+projects/**/*.asm linguist-vendored
+projects/**/*.vm linguist-vendored
+projects/**/*.jack linguist-vendored

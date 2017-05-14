@@ -5,6 +5,6 @@ Nand2Tetris course solutions
 - Refactor code solutions, and make executable JARs
 - Make some SVG images for logic circuits
 
-Current status: CH08
+Current status: reading CH09
 
 Stay tuned... :P
