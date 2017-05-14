@@ -1,0 +1,19 @@
+
+class Main {
+
+  function void main() {
+    
+    var int a,b;
+    var int sum;
+    
+    let a = Keyboard.readInt("Enter first number: ");
+    let b = Keyboard.readInt("Enter second number: ");
+    
+    let sum = a+b;
+    do Output.printString("Sum is ");
+    do Output.printInt(sum);
+  
+    return;
+  }
+
+}
