@@ -17,7 +17,7 @@ object Main {
 
     val res = handleArgs(args)
     if (res.isEmpty) return
-    
+
     val Some((inputFile, outputFile)) = res
 
     val symbolTable = new SymbolTable()

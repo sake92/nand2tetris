@@ -10,44 +10,54 @@ object Main {
     val res = handleArgs(args)
     if (res.isEmpty) return
 
-    val (inputFiles, outputFile) = res.get
+    val files = res.get
 
     println("INPUT FILES: ")
-    println(inputFiles.mkString("\n"))
+    println(files.map(_._1.getAbsolutePath).mkString("\n"))
 
-    println("OUTPUT FILE: ")
-    println(outputFile)
+    println("OUTPUT VM FILES: ")
+    println(files.map(_._2.getAbsolutePath).mkString("\n"))
 
-    val codeGenerator = CodeGenerator(outputFile)
+    println("OUTPUT XML FILES: ")
+    println(files.map(_._3.getAbsolutePath).mkString("\n"))
 
-    if (args.length <= 1 || args(1) == null) // if you pass second param, there'll be no bootstrap code generated :)
-      codeGenerator.writeBootstrap("BOOTSTRAP")
+    // TODO
+    // da GENERATOR prima SEKVENCU PISAČA U FAJLOVE!!! :D
+    // tipa XML, VM ... :D
 
-    for (f <- inputFiles) writeCode(f, codeGenerator)
+    /*for ((input, outputXML, outputVM) <- files) {
+      // if you pass second param, there'll be no XML code generated :)
+      if (args.length <= 1 || args(1) == null) {
+        codeGenerator.writeBootstrap("BOOTSTRAP")
+      }
+      
+      val codeGenerator = CodeGenerator(outputFile)
+      writeCode(f, codeGenerator)
+    }
 
-    codeGenerator.close()
+    codeGenerator.close()*/
   }
 
-  private def writeCode(f: File, codeGenerator: CodeGenerator) = {
+  /*private def writeCode(f: File, codeGenerator: CodeGenerator) = {
     val parser = Parser(f)
     var instruction: Option[I.Instruction] = null
     while ({ instruction = parser.next(); instruction.isDefined }) {
       codeGenerator.write(instruction.get, f.getName.dropRight(3)) // must drop ".vm"
     }
     parser.close()
-  }
+  }*/
 
   /**
-   * @return Optional tuple (inputFiles, outputFile)
+   * @return Optional list of tuples (input, outputXML, outputVM)
    */
-  private def handleArgs(args: Array[String]): Option[(Seq[File], File)] = {
+  private def handleArgs(args: Array[String]): Option[Seq[(File, File, File)]] = {
     if (args.length < 1) {
-      println("You must provide a file(*.vm)/folder name!")
+      println("You must provide a file(*.jack)/folder name!")
       None
     } else {
       val fileName = args(0)
       if (fileName == null || fileName.trim.isEmpty) {
-        println("You must provide a file(*.vm)/folder name!")
+        println("You must provide a file(*.jack)/folder name!")
         None
       } else {
         val fileOrFolder = new File(fileName)
@@ -57,8 +67,8 @@ object Main {
         } else if (fileOrFolder.isFile) {
           handleFile(fileOrFolder)
         } else {
-          // one folder - one HACK file! :) inside that folder!
-          Option((handleFolder(fileOrFolder), new File(fileOrFolder, fileOrFolder.getName + ".asm")))
+          val fileTuples = handleFolder(fileOrFolder).map(file2ResultTuple)
+          Option(fileTuples)
         }
       }
     }
@@ -68,22 +78,28 @@ object Main {
     folder.listFiles(
       new FilenameFilter() {
         def accept(dir: File, name: String): Boolean = {
-          name.toLowerCase().endsWith(".vm");
+          name.toLowerCase().endsWith(".jack");
         }
       }
     )
   }
 
   // (inputFile, outputFile)
-  private def handleFile(file: File): Option[(Seq[File], File)] = {
-    val fileName = file.getName
-    val (name, ext) = fileName.splitAt(fileName.length - 3)
+  private def handleFile(file: File): Option[Seq[(File, File, File)]] = {
+    val ext = file.getName.dropRight(5)
     if (ext != ".vm") {
-      println("File must have a '.vm' extension!")
+      println("File must have a '.jack' extension!")
       None
     } else {
-      Option(Seq(file), new File(file.getParent, name + ".asm"))
+      Option(Seq(file2ResultTuple(file)))
     }
+  }
+
+  /** @return (input, outputXml, outputVM) */
+  private def file2ResultTuple(f: File): (File, File, File) = {
+    val outVM = new File(f.getParent, f.getName + ".vm")
+    val outXML = new File(f.getParent, f.getName + ".xml")
+    (f, outVM, outXML)
   }
 
 }

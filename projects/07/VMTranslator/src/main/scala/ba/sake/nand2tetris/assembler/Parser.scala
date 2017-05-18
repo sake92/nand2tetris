@@ -110,14 +110,17 @@ object Parser {
     new Parser(br)
   }
 
-  val Newline = P(StringIn("\r\n", "\n"))
-  val Whitespace = P(" " | "\t")
-  val Comment = P("//" ~ AnyChar.rep ~ End)
   val Letter = P(CharPred(_.isLetter))
   val Digit = P(CharPred(_.isDigit))
-  val Number = Digit.rep(min = 1).!.map(_.toLong) // captured number
-  val LetterOrDigit = P(CharPred(_.isLetterOrDigit))
-  val Symbol = P(!Digit ~ (LetterOrDigit | "." | "_" | "$" | ":").rep)! // must begin with NOT-DIGIT
+  val SymFirst = P(Letter | "." | "_" | "$" | ":") // symbol must begin with NON-DIGIT
+  val Symbol = P(SymFirst ~ (SymFirst | Digit).rep)!
+
+  val Newline = P(StringIn("\r\n", "\n"))
+  val WhiteSpace = P(" " | "\t")
+  val WS = WhiteSpace.rep(min = 1)
+  val Comment = P("//" ~ AnyChar.rep ~ End)
+
+  val Number: P[Int] = Digit.rep(min = 1).!.map(_.toInt) // captured Int number
 
   // SEGMENTS
   val ArgumentSegment = P("argument").!.map(_ => S.ArgumentSegment)
@@ -143,27 +146,27 @@ object Parser {
   val OrInstruction = P("or").!.map(I.OrInstruction.apply)
   val NotInstruction = P("not").!.map(I.NotInstruction.apply)
 
-  val PushInstruction = P("push" ~ Whitespace.rep(min = 1) ~ Segment ~ Whitespace.rep(min = 1) ~ Number).map {
+  val PushInstruction = P("push" ~ WS ~ Segment ~ WS ~ Number).map {
     case (segment, index) => I.PushInstruction(s"push ${segment.raw} $index", segment, index)
   }
-  val PopInstruction = P("pop" ~ Whitespace.rep(min = 1) ~ Segment ~ Whitespace.rep(min = 1) ~ Number).map {
+  val PopInstruction = P("pop" ~ WS ~ Segment ~ WS ~ Number).map {
     case (segment, index) => I.PopInstruction(s"pop ${segment.raw} $index", segment, index)
   }
 
-  val LabelInstruction = P("label" ~ Whitespace.rep(min = 1) ~ Symbol).map {
+  val LabelInstruction = P("label" ~ WS ~ Symbol).map {
     label => I.LabelInstruction(s"label $label", label)
   }
-  val GotoInstruction = P("goto" ~ Whitespace.rep(min = 1) ~ Symbol).map {
+  val GotoInstruction = P("goto" ~ WS ~ Symbol).map {
     label => I.GotoInstruction(s"goto $label", label)
   }
-  val IfGotoInstruction = P("if-goto" ~ Whitespace.rep(min = 1) ~ Symbol).map {
+  val IfGotoInstruction = P("if-goto" ~ WS ~ Symbol).map {
     label => I.IfGotoInstruction(s"if-goto $label", label)
   }
 
-  val FunctionDeclarationInstruction = P("function" ~ Whitespace.rep(min = 1) ~ Symbol ~ Whitespace.rep(min = 1) ~ Number).map {
+  val FunctionDeclarationInstruction = P("function" ~ WS ~ Symbol ~ WS ~ Number).map {
     case (name, numLocalVars) => I.FunctionDeclarationInstruction(s"function $name $numLocalVars", name, numLocalVars)
   }
-  val FunctionCallInstruction = P("call" ~ Whitespace.rep(min = 1) ~ Symbol ~ Whitespace.rep(min = 1) ~ Number).map {
+  val FunctionCallInstruction = P("call" ~ WS ~ Symbol ~ WS ~ Number).map {
     case (name, numArgs) => I.FunctionCallInstruction(s"call $name $numArgs", name, numArgs)
   }
   val ReturnInstruction = P("return").map(_ => I.ReturnInstruction("return"))
@@ -174,5 +177,5 @@ object Parser {
     LabelInstruction | GotoInstruction | IfGotoInstruction |
     FunctionDeclarationInstruction | FunctionCallInstruction | ReturnInstruction
 
-  val FinalP = Whitespace.rep ~ Instruction.? ~ Whitespace.rep ~ Comment.?
+  val FinalP = WhiteSpace.rep ~ Instruction.? ~ WhiteSpace.rep ~ Comment.?
 }

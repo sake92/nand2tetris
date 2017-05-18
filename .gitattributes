@@ -6,3 +6,4 @@ projects/**/*.hack linguist-vendored
 projects/**/*.asm linguist-vendored
 projects/**/*.vm linguist-vendored
 projects/**/*.jack linguist-vendored
+projects/**/*.html linguist-vendored

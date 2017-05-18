@@ -6,69 +6,137 @@ import java.io.File
 import java.io.InputStreamReader
 import java.nio.file.Files
 
-import fastparse.all._
+object AST {
 
-/** Segments */
-object S {
+  sealed trait ClassNameOrVarName
 
-  /* LCL, ARG, THIS, THAT, TEMP are PREDEFINED in their IMPLEMENTATION of the Assembler !!! */
+  /* It is a pity I don't know how to make this stuff easier... :/ */
+  sealed trait VoidOrType
+  sealed trait Type extends VoidOrType
+  case class ClassName(name: String) extends Type with ClassNameOrVarName
 
-  sealed abstract class MemorySegment {
-    def raw: String
-  }
-  /** Normal means a POINTER! :D */
-  case class NormalSegment(raw: String, baseAddress: String) extends MemorySegment // indirect access:  M[M[base]+index]
-  case class OffsetSegment(raw: String, baseAddress: String) extends MemorySegment // direct access:    M[base+index]
-  case class StatSegment(raw: String) extends MemorySegment
-  case class ConstSegment(raw: String) extends MemorySegment // const: index
+  case class VarName(name: String) extends ClassNameOrVarName
+  case class SubroutineName(name: String)
 
-  // IMPORTANT, see page 142 !!!!!
-  val LocalSegment = NormalSegment("local", "LCL")
-  val ArgumentSegment = NormalSegment("argument", "ARG")
-  val ThisSegment = NormalSegment("this", "THIS")
-  val ThatSegment = NormalSegment("that", "THAT")
+  /* TERMINALS: keyword, symbol, integerConstant, stringConstant, or identifier */
 
-  val PointerSegment = OffsetSegment("pointer", "THIS") // this=0, that=1 !?
-  val TempSegment = OffsetSegment("temp", "R5")
+  /* KEYWORDS */
+  sealed trait KeywordTerminal { def raw: String }
 
-  val ConstantSegment = ConstSegment("constant") // no base address, just a dummy
+  // keywords as constants
+  sealed trait KeywordConstant extends KeywordTerminal
+  case object TrueConstant extends KeywordConstant { def raw = "true" }
+  case object FalseConstant extends KeywordConstant { def raw = "false" }
+  case object NullConstant extends KeywordConstant { def raw = "true" }
+  case object ThisConstant extends KeywordConstant { def raw = "this" }
 
-  val StaticSegment = StatSegment("static")
-}
+  // keywords that represent a type
+  sealed trait KeywordType extends KeywordTerminal with Type
+  case object Int extends KeywordType { def raw = "int" }
+  case object Char extends KeywordType { def raw = "char" }
+  case object Boolean extends KeywordType { def raw = "boolean" }
 
-/** Instructions AST */
-object I {
+  // keywords that represent field type
+  sealed trait KeywordFieldType extends KeywordTerminal
+  case object Static extends KeywordFieldType { def raw = "static" }
+  case object Field extends KeywordFieldType { def raw = "field" }
 
-  sealed abstract class Instruction {
-    def raw: String
-  }
-  /* Arithmetic and logical instructions */
-  case class AddInstruction(raw: String) extends Instruction
-  case class SubInstruction(raw: String) extends Instruction
-  case class AndInstruction(raw: String) extends Instruction
-  case class OrInstruction(raw: String) extends Instruction
+  // keywords that represent subroutine type
+  sealed trait SubroutineType extends KeywordTerminal
+  case object Constructor extends SubroutineType { def raw = "constructor" }
+  case object Function extends SubroutineType { def raw = "function" }
+  case object Method extends SubroutineType { def raw = "method" }
 
-  case class EqInstruction(raw: String) extends Instruction
-  case class GtInstruction(raw: String) extends Instruction
-  case class LtInstruction(raw: String) extends Instruction
+  case object Void extends KeywordTerminal with VoidOrType { def raw = "void" } // this one is special :p
 
-  case class NegInstruction(raw: String) extends Instruction
-  case class NotInstruction(raw: String) extends Instruction
+  // These are "useless"/"meaingless"/"throw-away" keywords
+  /*case class Keyword(raw: String) extends KeywordTerminal
+  val kwdClass = Keyword("class")
+  val kwdVar = Keyword("var")
+  val kwdLet = Keyword("let")
+  val kwDo = Keyword("do")
+  val kwdIf = Keyword("if")
+  val kwdElse = Keyword("else")
+  val kwdWhile = Keyword("while")
+  val kwdReturn = Keyword("return")*/
 
-  /* Memory access instructions */
-  case class PushInstruction(raw: String, segment: S.MemorySegment, index: Long) extends Instruction
-  case class PopInstruction(raw: String, segment: S.MemorySegment, index: Long) extends Instruction
+  /* SYMBOLS */
+  sealed trait SymbolTerminal { def raw: String }
 
-  //////// Part 2
-  /* Program flow instructions */
-  case class LabelInstruction(raw: String, label: String) extends Instruction // function-scoped
-  case class GotoInstruction(raw: String, label: String) extends Instruction // function-scoped, jump unconditional
-  case class IfGotoInstruction(raw: String, label: String) extends Instruction // function-scoped, jump conditional (topmost value on the stack)
+  sealed trait UnaryOp extends SymbolTerminal
+  case object Negate extends UnaryOp { def raw = "-" }
+  case object Invert extends UnaryOp { def raw = "~" }
 
-  /* Function Calling instructions */
-  case class FunctionDeclarationInstruction(raw: String, name: String, numLocalVars: Long) extends Instruction
-  case class FunctionCallInstruction(raw: String, name: String, numArgs: Long) extends Instruction
-  case class ReturnInstruction(raw: String) extends Instruction
+  sealed trait BinaryOp extends SymbolTerminal
+  case object Plus extends BinaryOp { def raw = "+" }
+  case object Minus extends BinaryOp { def raw = "-" }
+  case object Multiply extends BinaryOp { def raw = "*" }
+  case object Divide extends BinaryOp { def raw = "/" }
+  case object And extends BinaryOp { def raw = "&" }
+  case object Or extends BinaryOp { def raw = "|" }
+  case object LessThan extends BinaryOp { def raw = "<" }
+  case object GreaterThan extends BinaryOp { def raw = ">" }
+  case object EqualTo extends BinaryOp { def raw = "=" }
+
+  // use-once symbols
+  /*case class Symbol(raw: String) extends SymbolTerminal
+  val symLeftBrace = Symbol("{")
+  val symRightBrace = Symbol("}")
+  val symLeftParen = Symbol("(")
+  val symRightParen = Symbol(")")
+  val symLeftBracket = Symbol("[")
+  val symRightBracket = Symbol("]")
+  val symDot = Symbol(".")
+  val symComma = Symbol(",")
+  val symSemicolon = Symbol(";")*/
+
+  case class IntConst(value: Int)
+  case class StringConst(value: String)
+
+  /* NON-TERMINALS */
+  /* class, classVarDec, subroutineDec, parameterList,
+   * subroutineBody, varDec,
+   * statements, whileSatement, ifStatement, returnStatement,
+   * letStatement, doStatement, expression, term, expressionList
+   */
+
+  sealed trait SubroutineCall
+  case class SubroutineCallNormal(subName: SubroutineName, expressions: ExpressionList) extends SubroutineCall
+  case class SubroutineCallPrefixed(classOrVarName: ClassNameOrVarName, subName: SubroutineName, expressions: ExpressionList) extends SubroutineCall
+
+  case class Expression(term: Term, opTerms: Seq[(BinaryOp, Term)])
+  case class ExpressionList(expressions: Seq[Expression])
+
+  sealed trait Term
+  case class IntegerConstantTerm(int: IntConst) extends Term
+  case class StringConstantTerm(str: StringConst) extends Term
+  case class KeywordConstantTerm(kwd: KeywordConstant) extends Term
+  case class VarNameTerm(varName: VarName) extends Term
+  case class ArrayTerm(arrName: VarName, expr: Expression) extends Term
+  case class SubroutineCallTerm(subroutineCall: SubroutineCall) extends Term
+  case class ParensExprTerm(expr: Expression) extends Term
+  case class UnaryOpTerm(unaryOp: UnaryOp, term: Term) extends Term
+
+  // statements
+  sealed trait Statement
+  case class LetStatement(varName: VarName, maybeIndexExpr: Option[Expression], expr: Expression) extends Statement
+  case class IfStatement(condition: Expression, ifTrueStatements: Seq[Statement], ifFalseStatements: Option[Seq[Statement]]) extends Statement
+  case class WhileStatement(condition: Expression, statements: Seq[Statement]) extends Statement
+  case class DoStatement(subroutineCall: SubroutineCall) extends Statement
+  case class ReturnStatement(expr: Option[Expression]) extends Statement
+
+  case class VarDec(tpe: Type, varName: VarName, varNames: Seq[VarName])
+
+  case class ParameterList(params: Seq[(Type, VarName)])
+  case class SubroutineBody(varDecs: Seq[VarDec], statements: Seq[Statement])
+
+  case class ClassVarDec(fieldType: KeywordFieldType, tpe: Type, varName: VarName, varNames: Seq[VarName])
+
+  case class SubroutineDec(subroutineType: SubroutineType, voidOrType: VoidOrType, subroutineName: SubroutineName,
+                           parameterList: ParameterList, subroutineBody: SubroutineBody)
+
+  case class ClassDec(className: ClassName, classVarDecs: Seq[ClassVarDec], subroutineDecs: Seq[SubroutineDec])
+
 }
 
 /** The parser. */
@@ -76,8 +144,9 @@ class Parser(br: BufferedReader) {
 
   import Parser._
 
-  def next(): Option[I.Instruction] = {
-    Option(br.readLine()) match {
+  def next(): Option[ /*I.Instruction*/ String] = {
+    None
+    /*Option(br.readLine()) match {
       case None => { // end of input
         br.close()
         None
@@ -86,7 +155,7 @@ class Parser(br: BufferedReader) {
         case Some(i: I.Instruction) => Option(i)
         case _ => next() // if not an instruction, skip
       }
-    }
+    }*/
   }
 
   def close(): Unit = {
@@ -94,10 +163,9 @@ class Parser(br: BufferedReader) {
   }
 }
 
-/**
- * The companion object. A bit easier to read when separated from the class... :D
- * Contains "static" stuff.
- */
+/** The companion object. A bit easier to read when separated from the class... :D
+  * Contains "static" stuff.
+  */
 object Parser {
 
   def apply(inputFile: File): Parser = {
@@ -110,69 +178,171 @@ object Parser {
     new Parser(br)
   }
 
-  val Newline = P(StringIn("\r\n", "\n"))
-  val Whitespace = P(" " | "\t")
-  val Comment = P("//" ~ AnyChar.rep ~ End)
+  val White = fastparse.WhitespaceApi.Wrapper {
+    import fastparse.all._
+    val NL = P("\r\n" | "\n")
+    val WS = P(" " | "\t" | NL)
+
+    /* This is shamelessly stolen from here: 
+     * https://github.com/lihaoyi/fastparse/blob/master/scalaparse/shared/src/main/scala/scalaparse/syntax/Literals.scala#L52 
+     * :sadface:
+     * */
+    val CommentChunk = P(CharsWhile(c => c != '/' && c != '*') | !"*/" ~ AnyChar)
+    val MultilineComment: P0 = P("/*" ~/ CommentChunk.rep ~ "*/")
+
+    val SameLineCharChunks = P(CharsWhile(c => c != '\n' && c != '\r') | !NL ~ AnyChar)
+    val LineComment = P("//" ~ SameLineCharChunks.rep ~ &(NL | End))
+    val Comment: P0 = P(MultilineComment | LineComment)
+
+    val IGNORE = P(WS | Comment)
+    NoTrace(IGNORE.rep)
+  }
+  import fastparse.noApi._
+  import White._
+
+  // since we use WHITESPACE API, a few notes:
+  // methods "~" and "rep" take an implpicit parameter that defines whitespace to ignore
+  // methods "~~" and "repX" are NORMAL ones... :D explicit that is
+
+  // PRO-TIP
+  // ALWAYS PUT BRACKETS AROUND OPTIONAL PARSERSSSSSSS!
+  // e.g. z~((a~b)?) and NOT like z~(a~b)?
+
   val Letter = P(CharPred(_.isLetter))
   val Digit = P(CharPred(_.isDigit))
-  val Number = Digit.rep(min = 1).!.map(_.toLong) // captured number
-  val LetterOrDigit = P(CharPred(_.isLetterOrDigit))
-  val Symbol = P(!Digit ~ (LetterOrDigit | "." | "_" | "$" | ":").rep)! // must begin with NOT-DIGIT
+  val IdentifierFirst = P(Letter | "." | "_" | "$" | ":") // symbol must begin with NON-DIGIT
+  val Identifier = P(IdentifierFirst ~~ (IdentifierFirst | Digit).repX)!
+  val Number = P(Digit.rep(min = 1)).!.map(_.toInt) // captured Int number
 
-  // SEGMENTS
-  val ArgumentSegment = P("argument").!.map(_ => S.ArgumentSegment)
-  val LocalSegment = P("local").!.map(_ => S.LocalSegment)
-  val StaticSegment = P("static").!.map(_ => S.StaticSegment)
-  val ConstantSegment = P("constant").!.map(_ => S.ConstantSegment)
-  val ThisSegment = P("this").!.map(_ => S.ThisSegment)
-  val ThatSegment = P("that").!.map(_ => S.ThatSegment)
-  val PointerSegment = P("pointer").!.map(_ => S.PointerSegment)
-  val TempSegment = P("temp").!.map(_ => S.TempSegment)
+  /* LEXICAL ELEMENTS */
+  val kwdClass = P("class") //.!.map(_ => AST.kwdClass)
+  val kwdVar = P("var") //.!.map(_ => AST.kwdVar)
+  val kwdLet = P("let") //.!.map(_ => AST.kwdLet)
+  val kwdDo = P("do") //.!.map(_ => AST.kwDo)
+  val kwdIf = P("if") //.!.map(_ => AST.kwdIf)
+  val kwdElse = P("else") //.!.map(_ => AST.kwdElse)
+  val kwdWhile = P("while") //.!.map(_ => AST.kwdWhile)
+  val kwdReturn = P("return") //.!.map(_ => AST.kwdReturn)
+  val kwdConstructor = P("constructor").!.map(_ => AST.Constructor)
+  val kwdFunction = P("function").!.map(_ => AST.Function)
+  val kwdMethod = P("method").!.map(_ => AST.Method)
+  val kwdField = P("field").!.map(_ => AST.Field)
+  val kwdStatic = P("static").!.map(_ => AST.Static)
+  val kwdInt = P("int").!.map(_ => AST.Int)
+  val kwdChar = P("char").!.map(_ => AST.Char)
+  val kwdBoolean = P("boolean").!.map(_ => AST.Boolean)
+  val kwdVoid = P("void").!.map(_ => AST.Void)
+  val kwdTrue = P("true").!.map(_ => AST.TrueConstant)
+  val kwdFalse = P("false").!.map(_ => AST.FalseConstant)
+  val kwdNull = P("null").!.map(_ => AST.NullConstant)
+  val kwdThis = P("this").!.map(_ => AST.ThisConstant)
 
-  val Segment: P[S.MemorySegment] = ArgumentSegment | LocalSegment | StaticSegment | ConstantSegment |
-    ThisSegment | ThatSegment | PointerSegment | TempSegment
+  val symLeftBrace = P("{") //.!.map(_ => AST.symLeftBrace)
+  val symRightBrace = P("}") //.!.map(_ => AST.symRightBrace)
+  val symLeftParen = P("(") //.!.map(_ => AST.symLeftParen)
+  val symRightParen = P(")") //.!.map(_ => AST.symRightParen)
+  val symLeftBracket = P("[") //.!.map(_ => AST.symLeftBracket)
+  val symRightBracket = P("]") //.!.map(_ => AST.symRightBracket)
+  val symDot = P(".") //.!.map(_ => AST.symDot)
+  val symComma = P(",") //.!.map(_ => AST.symComma)
+  val symSemicolon = P(";") //.!.map(_ => AST.symSemicolon)
+  val symPlus = P("+").!.map(_ => AST.Plus)
+  val symMinus = P("-").!.map(_ => AST.Minus)
+  val symMultiply = P("*").!.map(_ => AST.Multiply)
+  val symDivide = P("/").!.map(_ => AST.Divide)
+  val symAnd = P("&").!.map(_ => AST.And)
+  val symOr = P("|").!.map(_ => AST.Or)
+  val symLessThan = P("<").!.map(_ => AST.LessThan)
+  val symGreaterThan = P(">").!.map(_ => AST.GreaterThan)
+  val symEqual = P("=").!.map(_ => AST.EqualTo)
 
-  // INSTRUCTIONS
-  val AddInstruction = P("add").!.map(I.AddInstruction.apply)
-  val SubInstruction = P("sub").!.map(I.SubInstruction.apply)
-  val NegInstruction = P("neg").!.map(I.NegInstruction.apply)
-  val EqInstruction = P("eq").!.map(I.EqInstruction.apply)
-  val GtInstruction = P("gt").!.map(I.GtInstruction.apply)
-  val LtInstruction = P("lt").!.map(I.LtInstruction.apply)
-  val AndInstruction = P("and").!.map(I.AndInstruction.apply)
-  val OrInstruction = P("or").!.map(I.OrInstruction.apply)
-  val NotInstruction = P("not").!.map(I.NotInstruction.apply)
+  val symNegate = P("-").!.map(_ => AST.Negate)
+  val symTilda = P("~").!.map(_ => AST.Invert)
 
-  val PushInstruction = P("push" ~ Whitespace.rep(min = 1) ~ Segment ~ Whitespace.rep(min = 1) ~ Number).map {
-    case (segment, index) => I.PushInstruction(s"push ${segment.raw} $index", segment, index)
+  ///////////////////////
+  /*val KEYWORD: P[AST.KeywordTerminal] = P(kwdClass | kwdConstructor | kwdFunction | kwdMethod | kwdField |
+    kwdStatic | kwdVar | kwdInt | kwdChar | kwdBoolean | kwdVoid | kwdTrue | kwdFalse |
+    kwdNull | kwdThis | kwdLet | kwdDo | kwdIf | kwdElse | kwdWhile | kwdReturn)
+
+  val SYMBOL: P[AST.SymbolTerminal] = P(symLeftBrace | symRightBrace | symLeftParen | symRightParen | symLeftBracket | symRightBracket |
+    symDot | symComma | symSemicolon | symPlus | symMinus | symMultiply | symDivide |
+    symAnd | symOr | symLessThan | symGreaterThan | symEqual | symTilda)
+
+    */
+
+  val INTEGER_CONSTANT = P(Number).map(AST.IntConst)
+  val STRING_CONSTANT = P("\"" ~ CharPred(c => c != '"' && c != '\r' && c != '\n').rep.! ~ "\"").map(AST.StringConst)
+
+  val CLASS_NAME = P(Identifier).map(AST.ClassName)
+  val SUBROUTINE_NAME = P(Identifier).map(AST.SubroutineName)
+  val VAR_NAME = P(Identifier).map(AST.VarName)
+  val TYPE: P[AST.Type] = P(kwdInt | kwdChar | kwdBoolean | CLASS_NAME)
+
+  /* EXPRESSIONS */
+  val KEYWORD_CONSTANT: P[AST.KeywordConstant] = P(kwdTrue | kwdFalse | kwdNull | kwdThis)
+  val UNARY_OP: P[AST.UnaryOp] = P(symNegate | symTilda)
+  val OP: P[AST.BinaryOp] = P(symPlus | symMinus | symMultiply | symDivide | symAnd | symOr | symLessThan | symGreaterThan | symEqual)
+
+  val arrayTerm = P(VAR_NAME ~ symLeftBracket ~/ EXPRESSION ~ symRightBracket).map(AST.ArrayTerm.tupled)
+  val parenExprTerm = P(symLeftParen ~/ EXPRESSION ~ symRightParen).map(AST.ParensExprTerm)
+  val subCallTerm = P(SUBROUTINE_CALL).map(AST.SubroutineCallTerm)
+  val unaryOpTerm = P(UNARY_OP ~ TERM)
+  val varNameTerm = P(VAR_NAME).map(AST.VarNameTerm)
+  val intConstTerm = P(INTEGER_CONSTANT).map(AST.IntegerConstantTerm)
+  val strConstTerm = P(STRING_CONSTANT).map(AST.StringConstantTerm)
+  val kwdConstTerm = P(KEYWORD_CONSTANT).map(AST.KeywordConstantTerm)
+  val TERM: P[AST.Term] = P(arrayTerm | subCallTerm | parenExprTerm |
+    varNameTerm | intConstTerm | strConstTerm | kwdConstTerm
+  )
+
+  val EXPRESSION: P[AST.Expression] = P(TERM ~ (OP ~ TERM).rep).map(AST.Expression.tupled)
+  val EXPRESSION_LIST = P((EXPRESSION ~ (symComma ~ EXPRESSION).rep) ?).map { res =>
+    val exprs = res.toList.flatMap { t => Seq(t._1) ++ t._2 }
+    AST.ExpressionList(exprs)
   }
-  val PopInstruction = P("pop" ~ Whitespace.rep(min = 1) ~ Segment ~ Whitespace.rep(min = 1) ~ Number).map {
-    case (segment, index) => I.PopInstruction(s"pop ${segment.raw} $index", segment, index)
+
+  val classNameOrVarName: P[AST.ClassNameOrVarName] = P(CLASS_NAME | VAR_NAME)
+  val subroutineCallNormal = P(SUBROUTINE_NAME ~ symLeftParen ~ EXPRESSION_LIST ~ symRightParen).map(AST.SubroutineCallNormal.tupled)
+  val subroutineCallPrefixed = P(classNameOrVarName ~ symDot ~ SUBROUTINE_NAME ~ symLeftParen ~ EXPRESSION_LIST ~ symRightParen).
+    map(AST.SubroutineCallPrefixed.tupled)
+  val SUBROUTINE_CALL: P[AST.SubroutineCall] = P(subroutineCallNormal | subroutineCallPrefixed)
+
+  /* STATEMENTS */
+  val LET_STATEMENT: P[AST.LetStatement] = P(kwdLet ~ VAR_NAME ~ ((symLeftBracket ~ EXPRESSION ~ symRightBracket)?) ~
+    symEqual ~ EXPRESSION ~ symSemicolon).map {
+    case (varName, maybeIndex, _, expr) => AST.LetStatement(varName, maybeIndex, expr)
   }
 
-  val LabelInstruction = P("label" ~ Whitespace.rep(min = 1) ~ Symbol).map {
-    label => I.LabelInstruction(s"label $label", label)
-  }
-  val GotoInstruction = P("goto" ~ Whitespace.rep(min = 1) ~ Symbol).map {
-    label => I.GotoInstruction(s"goto $label", label)
-  }
-  val IfGotoInstruction = P("if-goto" ~ Whitespace.rep(min = 1) ~ Symbol).map {
-    label => I.IfGotoInstruction(s"if-goto $label", label)
+  val IF_STATEMENT = P(kwdIf ~ symLeftParen ~ EXPRESSION ~ symRightParen ~ symLeftBrace ~ STATEMENTS ~ symRightBrace ~
+    ((kwdElse ~ symLeftBrace ~ STATEMENTS ~ symRightBrace)?)).map(AST.IfStatement.tupled)
+
+  val WHILE_STATEMENT = P(kwdWhile ~ symLeftParen ~ EXPRESSION ~ symRightParen ~
+    symLeftBrace ~ STATEMENTS ~ symRightBrace).map(AST.WhileStatement.tupled)
+
+  val DO_STATEMENT = P(kwdDo ~ SUBROUTINE_CALL ~ symSemicolon).map(AST.DoStatement)
+
+  val RETURN_STATEMENT = P(kwdReturn ~ (EXPRESSION?) ~ symSemicolon).map(AST.ReturnStatement)
+
+  val STATEMENT: P[AST.Statement] = P(LET_STATEMENT | IF_STATEMENT | WHILE_STATEMENT | DO_STATEMENT | RETURN_STATEMENT)
+  val STATEMENTS: P[Seq[AST.Statement]] = P(STATEMENT.rep)
+
+  /* PROGRAM STRUCTURE */
+  val VAR_DEC = P(kwdVar ~ TYPE ~ VAR_NAME ~ (symComma ~ VAR_NAME).rep ~ symSemicolon).map(AST.VarDec.tupled)
+
+  val PARAMETER_LIST = P(((TYPE ~ VAR_NAME) ~ (symComma ~ TYPE ~ VAR_NAME).rep)?).map { res =>
+    val params = res.toList.flatMap { t => Seq((t._1, t._2)) ++ t._3 }
+    AST.ParameterList(params)
   }
 
-  val FunctionDeclarationInstruction = P("function" ~ Whitespace.rep(min = 1) ~ Symbol ~ Whitespace.rep(min = 1) ~ Number).map {
-    case (name, numLocalVars) => I.FunctionDeclarationInstruction(s"function $name $numLocalVars", name, numLocalVars)
-  }
-  val FunctionCallInstruction = P("call" ~ Whitespace.rep(min = 1) ~ Symbol ~ Whitespace.rep(min = 1) ~ Number).map {
-    case (name, numArgs) => I.FunctionCallInstruction(s"call $name $numArgs", name, numArgs)
-  }
-  val ReturnInstruction = P("return").map(_ => I.ReturnInstruction("return"))
+  val fieldType: P[AST.KeywordFieldType] = P(kwdStatic | kwdField)
+  val CLASS_VAR_DEC = P(fieldType ~ TYPE ~ VAR_NAME ~ (symComma ~ VAR_NAME).rep ~ symSemicolon).map(AST.ClassVarDec.tupled)
 
-  val Instruction: P[I.Instruction] = AddInstruction | SubInstruction | NegInstruction |
-    EqInstruction | GtInstruction | LtInstruction | AndInstruction |
-    OrInstruction | NotInstruction | PushInstruction | PopInstruction |
-    LabelInstruction | GotoInstruction | IfGotoInstruction |
-    FunctionDeclarationInstruction | FunctionCallInstruction | ReturnInstruction
+  val SUBROUTINE_BODY = P(symLeftBrace ~ VAR_DEC.rep ~ STATEMENTS ~ symRightBrace).map(AST.SubroutineBody.tupled)
 
-  val FinalP = Whitespace.rep ~ Instruction.? ~ Whitespace.rep ~ Comment.?
+  val subroutineType: P[AST.SubroutineType] = P(kwdConstructor | kwdFunction | kwdMethod)
+  val voidOrType: P[AST.VoidOrType] = P(kwdVoid | TYPE)
+  val SUBROUTINE_DEC = P(subroutineType ~ voidOrType ~ SUBROUTINE_NAME ~ symLeftParen ~ PARAMETER_LIST ~ symRightParen ~ SUBROUTINE_BODY).map(AST.SubroutineDec.tupled)
+
+  val CLASS_DEC = P(kwdClass ~ CLASS_NAME ~ symLeftBrace ~ CLASS_VAR_DEC.rep ~ SUBROUTINE_DEC.rep ~ symRightBrace).map(AST.ClassDec.tupled)
+
 }

@@ -126,14 +126,16 @@ object Parser {
     new Parser(br1, br2, symbolTable)
   }
 
-  val Newline = P(StringIn("\r\n", "\n"))
-  val Whitespace = P(" " | "\t" | Newline)
-  val Comment = P("//" ~ AnyChar.rep ~ End)
   val Letter = P(CharPred(_.isLetter))
   val Digit = P(CharPred(_.isDigit))
+  val SymFirst = P(Letter | "." | "_" | "$" | ":") // symbol must begin with NON-DIGIT
+  val Symbol = P(SymFirst ~ (SymFirst | Digit).rep)!
+
+  val Newline = P(StringIn("\r\n", "\n"))
+  val Whitespace = P(" " | "\t")
+  val Comment = P("//" ~ AnyChar.rep ~ End)
+
   val Number: P[Int] = Digit.rep(min = 1).!.map(_.toInt) // captured Int number
-  val LetterOrDigit = P(CharPred(_.isLetterOrDigit))
-  val Symbol = P(!Digit ~ (LetterOrDigit | "." | "_" | "$" | ":").rep)! // must begin with NOT-DIGIT
 
   // Symbol pseudo-instruction
   val SymbolInstruction = P("(" ~ Symbol.! ~ ")").map(s => I.SymbolInstruction(s))
