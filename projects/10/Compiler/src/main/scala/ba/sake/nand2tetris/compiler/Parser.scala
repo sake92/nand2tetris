@@ -27,7 +27,7 @@ object AST {
   sealed trait KeywordConstant extends KeywordTerminal
   case object TrueConstant extends KeywordConstant { def raw = "true" }
   case object FalseConstant extends KeywordConstant { def raw = "false" }
-  case object NullConstant extends KeywordConstant { def raw = "true" }
+  case object NullConstant extends KeywordConstant { def raw = "null" }
   case object ThisConstant extends KeywordConstant { def raw = "this" }
 
   // keywords that represent a type
@@ -112,7 +112,7 @@ object AST {
   case class StringConstantTerm(str: StringConst) extends Term
   case class KeywordConstantTerm(kwd: KeywordConstant) extends Term
   case class VarNameTerm(varName: VarName) extends Term
-  case class ArrayTerm(arrName: VarName, expr: Expression) extends Term
+  case class ArrayTerm(arrName: VarName, expr: Expression) extends Term // arr[0] (selection of element...)
   case class SubroutineCallTerm(subroutineCall: SubroutineCall) extends Term
   case class ParensExprTerm(expr: Expression) extends Term
   case class UnaryOpTerm(unaryOp: UnaryOp, term: Term) extends Term
@@ -133,49 +133,42 @@ object AST {
   case class ClassVarDec(fieldType: KeywordFieldType, tpe: Type, varName: VarName, varNames: Seq[VarName])
 
   case class SubroutineDec(subroutineType: SubroutineType, voidOrType: VoidOrType, subroutineName: SubroutineName,
-                           parameterList: ParameterList, subroutineBody: SubroutineBody)
+    parameterList: ParameterList, subroutineBody: SubroutineBody)
 
   case class ClassDec(className: ClassName, classVarDecs: Seq[ClassVarDec], subroutineDecs: Seq[SubroutineDec])
 
 }
 
 /** The parser. */
-class Parser(br: BufferedReader) {
+class Parser(in: String) {
 
   import Parser._
 
-  def next(): Option[ /*I.Instruction*/ String] = {
-    None
-    /*Option(br.readLine()) match {
-      case None => { // end of input
-        br.close()
-        None
-      }
-      case Some(line) => FinalP.parse(line).get.value match {
-        case Some(i: I.Instruction) => Option(i)
-        case _ => next() // if not an instruction, skip
-      }
-    }*/
+  import scala.collection.JavaConverters.asScalaIteratorConverter
+
+  def analyze(): AST.ClassDec = {
+    FINAL_PARSER.parse(in).get.value
   }
 
-  def close(): Unit = {
+  /*def close(): Unit = {
     br.close()
-  }
+  }*/
 }
 
-/** The companion object. A bit easier to read when separated from the class... :D
-  * Contains "static" stuff.
-  */
+/**
+ * The companion object. A bit easier to read when separated from the class... :D
+ * Contains "static" stuff.
+ */
 object Parser {
 
   def apply(inputFile: File): Parser = {
-    val br = Files.newBufferedReader(inputFile.toPath())
-    new Parser(br)
+    //val br = Files.newBufferedReader(inputFile.toPath())
+    new Parser("")
   }
 
   def apply(inputString: String): Parser = {
-    val br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(inputString.getBytes)))
-    new Parser(br)
+    // val br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(inputString.getBytes)))
+    new Parser(inputString)
   }
 
   val White = fastparse.WhitespaceApi.Wrapper {
@@ -210,7 +203,7 @@ object Parser {
 
   val Letter = P(CharPred(_.isLetter))
   val Digit = P(CharPred(_.isDigit))
-  val IdentifierFirst = P(Letter | "." | "_" | "$" | ":") // symbol must begin with NON-DIGIT
+  val IdentifierFirst = P(Letter | "_") // symbol must begin with NON-DIGIT
   val Identifier = P(IdentifierFirst ~~ (IdentifierFirst | Digit).repX)!
   val Number = P(Digit.rep(min = 1)).!.map(_.toInt) // captured Int number
 
@@ -271,7 +264,9 @@ object Parser {
     */
 
   val INTEGER_CONSTANT = P(Number).map(AST.IntConst)
-  val STRING_CONSTANT = P("\"" ~ CharPred(c => c != '"' && c != '\r' && c != '\n').rep.! ~ "\"").map(AST.StringConst)
+  val STRING_CONSTANT = P {
+    "\"" ~~ CharsWhile(c => c != '"' && c != '\n').rep.! ~~ "\""
+  }.map(AST.StringConst)
 
   val CLASS_NAME = P(Identifier).map(AST.ClassName)
   val SUBROUTINE_NAME = P(Identifier).map(AST.SubroutineName)
@@ -286,14 +281,13 @@ object Parser {
   val arrayTerm = P(VAR_NAME ~ symLeftBracket ~/ EXPRESSION ~ symRightBracket).map(AST.ArrayTerm.tupled)
   val parenExprTerm = P(symLeftParen ~/ EXPRESSION ~ symRightParen).map(AST.ParensExprTerm)
   val subCallTerm = P(SUBROUTINE_CALL).map(AST.SubroutineCallTerm)
-  val unaryOpTerm = P(UNARY_OP ~ TERM)
+  val unaryOpTerm = P(UNARY_OP ~ TERM).map(AST.UnaryOpTerm.tupled)
   val varNameTerm = P(VAR_NAME).map(AST.VarNameTerm)
   val intConstTerm = P(INTEGER_CONSTANT).map(AST.IntegerConstantTerm)
   val strConstTerm = P(STRING_CONSTANT).map(AST.StringConstantTerm)
   val kwdConstTerm = P(KEYWORD_CONSTANT).map(AST.KeywordConstantTerm)
-  val TERM: P[AST.Term] = P(arrayTerm | subCallTerm | parenExprTerm |
-    varNameTerm | intConstTerm | strConstTerm | kwdConstTerm
-  )
+  val TERM: P[AST.Term] = P(strConstTerm | intConstTerm | parenExprTerm | arrayTerm | subCallTerm |
+    kwdConstTerm | varNameTerm | unaryOpTerm)
 
   val EXPRESSION: P[AST.Expression] = P(TERM ~ (OP ~ TERM).rep).map(AST.Expression.tupled)
   val EXPRESSION_LIST = P((EXPRESSION ~ (symComma ~ EXPRESSION).rep) ?).map { res =>
@@ -303,9 +297,9 @@ object Parser {
 
   val classNameOrVarName: P[AST.ClassNameOrVarName] = P(CLASS_NAME | VAR_NAME)
   val subroutineCallNormal = P(SUBROUTINE_NAME ~ symLeftParen ~ EXPRESSION_LIST ~ symRightParen).map(AST.SubroutineCallNormal.tupled)
-  val subroutineCallPrefixed = P(classNameOrVarName ~ symDot ~ SUBROUTINE_NAME ~ symLeftParen ~ EXPRESSION_LIST ~ symRightParen).
+  val subroutineCallPrefixed = P(classNameOrVarName ~~ symDot ~~ SUBROUTINE_NAME ~~ symLeftParen ~ EXPRESSION_LIST ~ symRightParen).
     map(AST.SubroutineCallPrefixed.tupled)
-  val SUBROUTINE_CALL: P[AST.SubroutineCall] = P(subroutineCallNormal | subroutineCallPrefixed)
+  val SUBROUTINE_CALL: P[AST.SubroutineCall] = P(subroutineCallPrefixed | subroutineCallNormal)
 
   /* STATEMENTS */
   val LET_STATEMENT: P[AST.LetStatement] = P(kwdLet ~ VAR_NAME ~ ((symLeftBracket ~ EXPRESSION ~ symRightBracket)?) ~
@@ -345,4 +339,5 @@ object Parser {
 
   val CLASS_DEC = P(kwdClass ~ CLASS_NAME ~ symLeftBrace ~ CLASS_VAR_DEC.rep ~ SUBROUTINE_DEC.rep ~ symRightBrace).map(AST.ClassDec.tupled)
 
+  val FINAL_PARSER = P(Start ~ CLASS_DEC ~ End)
 }

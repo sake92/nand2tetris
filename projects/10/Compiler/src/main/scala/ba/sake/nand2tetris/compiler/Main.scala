@@ -2,40 +2,115 @@ package ba.sake.nand2tetris.compiler
 
 import java.io.File
 import java.io.FilenameFilter
+import java.nio.file.Files
+import scala.collection.JavaConverters._
 
 object Main {
+  def testMmain(args: Array[String]): Unit = {
+    val in = """
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/10/ExpressionLessSquare/SquareGame.jack
+
+/** Expressionless version of projects/10/Square/SquareGame.jack. */
+
+class SquareGame {
+   field Square square; 
+   field int direction; 
+
+   constructor SquareGame new() {
+      let square = square;
+      let direction = direction;
+      return square;
+   }
+
+   method void dispose() {
+      do square.dispose();
+      do Memory.deAlloc(square);
+      return;
+   }
+
+   method void moveSquare() {
+      if (direction) { do square.moveUp(); }
+      if (direction) { do square.moveDown(); }
+      if (direction) { do square.moveLeft(); }
+      if (direction) { do square.moveRight(); }
+      do Sys.wait(direction);
+      return;
+   }
+
+   method void run() {
+      var char key;
+      var boolean exit;
+      
+      let exit = key;
+      while (exit) {
+         while (key) {
+            let key = key;
+            do moveSquare();
+         }
+
+         if (key) { let exit = exit; }
+         if (key) { do square.decSize(); }
+         if (key) { do square.incSize(); }
+         if (key) { let direction = exit; }
+         if (key) { let direction = key; }
+         if (key) { let direction = square; }
+         if (key) { let direction = direction; }
+
+         while (key) {
+            let key = key;
+            do moveSquare();
+         }
+      }
+      return;
+    }
+}
+
+
+      """
+
+    val parser = Parser(in)
+    val result = parser.analyze()
+
+    val xmlGenerator = XmlGenerator()
+    xmlGenerator.generate(result)
+    xmlGenerator.close()
+
+  }
 
   def main(args: Array[String]): Unit = {
 
     val res = handleArgs(args)
     if (res.isEmpty) return
 
-    val files = res.get
+    for ((input, outputXML, outputVM) <- res.get) {
+      println("*************************")
 
-    println("INPUT FILES: ")
-    println(files.map(_._1.getAbsolutePath).mkString("\n"))
+      // 1. parse input
+      println("INPUT FILE: " + input.getAbsolutePath)
+      val parser = Parser(Files.readAllLines(input.toPath).asScala.mkString("\n"))
+      val result = parser.analyze()
 
-    println("OUTPUT VM FILES: ")
-    println(files.map(_._2.getAbsolutePath).mkString("\n"))
+      // 2. always generat VM files
+      /*
+       * println("OUTPUT VM FILE: " outputVM.getAbsolutePath)
+      val vmGenerator = VMGenerator(outputVM)
+        vmGenerator.generate(result)
+        vmGenerator.close()
+      */
 
-    println("OUTPUT XML FILES: ")
-    println(files.map(_._3.getAbsolutePath).mkString("\n"))
-
-    // TODO
-    // da GENERATOR prima SEKVENCU PISAČA U FAJLOVE!!! :D
-    // tipa XML, VM ... :D
-
-    /*for ((input, outputXML, outputVM) <- files) {
+      // 3. optionally generate XML
       // if you pass second param, there'll be no XML code generated :)
       if (args.length <= 1 || args(1) == null) {
-        codeGenerator.writeBootstrap("BOOTSTRAP")
+        println("OUTPUT XML FILE: " + outputXML.getAbsolutePath)
+        val xmlGenerator = XmlGenerator(outputXML)
+        xmlGenerator.generate(result)
+        xmlGenerator.close()
       }
-      
-      val codeGenerator = CodeGenerator(outputFile)
-      writeCode(f, codeGenerator)
     }
 
-    codeGenerator.close()*/
   }
 
   /*private def writeCode(f: File, codeGenerator: CodeGenerator) = {
@@ -86,8 +161,8 @@ object Main {
 
   // (inputFile, outputFile)
   private def handleFile(file: File): Option[Seq[(File, File, File)]] = {
-    val ext = file.getName.dropRight(5)
-    if (ext != ".vm") {
+    val ext = file.getName.takeRight(5)
+    if (ext != ".jack") {
       println("File must have a '.jack' extension!")
       None
     } else {
@@ -97,9 +172,10 @@ object Main {
 
   /** @return (input, outputXml, outputVM) */
   private def file2ResultTuple(f: File): (File, File, File) = {
-    val outVM = new File(f.getParent, f.getName + ".vm")
-    val outXML = new File(f.getParent, f.getName + ".xml")
-    (f, outVM, outXML)
+    val name = f.getName.dropRight(5)
+    val outXML = new File(f.getParent, name + ".xml")
+    val outVM = new File(f.getParent, name + ".vm")
+    (f, outXML, outVM)
   }
 
 }
