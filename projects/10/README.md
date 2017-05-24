@@ -6,8 +6,3 @@
   To skip generating XML files, pass any parameter, e.g. 
   "java -jar Compiler.jar MyFolder NO-XML"
 
-
-
-
-------------
-
