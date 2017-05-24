@@ -44,7 +44,7 @@ class VMGenerator(outWriter: Writer) {
     // and populate it
     currentSubroutineST = new SymbolTable()
     if (sd.subroutineType == AST.Method) {
-      currentSubroutineST.add("this", currentClass, SymbolTable.SymbolKinds.ARG); // this == arg[0]
+      currentSubroutineST.add("this", currentClass, SymbolTable.SymbolKinds.ARG) // this == arg[0]
     }
     handleParameterList(sd.parameterList)
 
@@ -125,8 +125,8 @@ class VMGenerator(outWriter: Writer) {
 
         /* 3. write back to array element */
         vmWriter.writePop(VMWriter.SegmentTypes.POINTER, 1) // pop (arr + index) into "that"
-        vmWriter.writePush(VMWriter.SegmentTypes.TEMP, 0); // pop result value into *(base+index)
-        vmWriter.writePop(VMWriter.SegmentTypes.THAT, 0);
+        vmWriter.writePush(VMWriter.SegmentTypes.TEMP, 0) // pop result value into *(base+index)
+        vmWriter.writePop(VMWriter.SegmentTypes.THAT, 0) // THAT IS USED for ARRAY, THIS for OBJECTs
       case None =>
         handleExpression(s.expr) // push result on stack
         vmWriter.writePop(symKind2VMSegment(sym.kind), sym.index) // pop into variable

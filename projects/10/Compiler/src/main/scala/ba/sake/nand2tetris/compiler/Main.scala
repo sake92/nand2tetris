@@ -69,7 +69,7 @@ object Main {
     folder.listFiles(
       new FilenameFilter() {
         def accept(dir: File, name: String): Boolean = {
-          name.toLowerCase().endsWith(".jack");
+          name.toLowerCase().endsWith(".jack")
         }
       }
     )
