@@ -186,7 +186,7 @@ class CodeGenerator(outWriter: Writer) {
               |$incrStack
               |""".stripMargin
         // NOT A NORMAL PUSH !!! :D
-        // we push te VALUE of the POINTER, not some variable TO POINTER...
+        // we push the VALUE of the POINTER, not some variable TO POINTER...
         val pushLcl = pushSegmentOnStack("LCL")
         val pushArg = pushSegmentOnStack("ARG")
         val pushThis = pushSegmentOnStack("THIS")

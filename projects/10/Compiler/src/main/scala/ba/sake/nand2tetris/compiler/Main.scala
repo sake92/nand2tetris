@@ -6,79 +6,6 @@ import java.nio.file.Files
 import scala.collection.JavaConverters._
 
 object Main {
-  def testMmain(args: Array[String]): Unit = {
-    val in = """
-// This file is part of www.nand2tetris.org
-// and the book "The Elements of Computing Systems"
-// by Nisan and Schocken, MIT Press.
-// File name: projects/10/ExpressionLessSquare/SquareGame.jack
-
-/** Expressionless version of projects/10/Square/SquareGame.jack. */
-
-class SquareGame {
-   field Square square; 
-   field int direction; 
-
-   constructor SquareGame new() {
-      let square = square;
-      let direction = direction;
-      return square;
-   }
-
-   method void dispose() {
-      do square.dispose();
-      do Memory.deAlloc(square);
-      return;
-   }
-
-   method void moveSquare() {
-      if (direction) { do square.moveUp(); }
-      if (direction) { do square.moveDown(); }
-      if (direction) { do square.moveLeft(); }
-      if (direction) { do square.moveRight(); }
-      do Sys.wait(direction);
-      return;
-   }
-
-   method void run() {
-      var char key;
-      var boolean exit;
-      
-      let exit = key;
-      while (exit) {
-         while (key) {
-            let key = key;
-            do moveSquare();
-         }
-
-         if (key) { let exit = exit; }
-         if (key) { do square.decSize(); }
-         if (key) { do square.incSize(); }
-         if (key) { let direction = exit; }
-         if (key) { let direction = key; }
-         if (key) { let direction = square; }
-         if (key) { let direction = direction; }
-
-         while (key) {
-            let key = key;
-            do moveSquare();
-         }
-      }
-      return;
-    }
-}
-
-
-      """
-
-    val parser = Parser(in)
-    val result = parser.analyze()
-
-    val xmlGenerator = XmlGenerator()
-    xmlGenerator.generate(result)
-    xmlGenerator.close()
-
-  }
 
   def main(args: Array[String]): Unit = {
 
@@ -94,12 +21,10 @@ class SquareGame {
       val result = parser.analyze()
 
       // 2. always generat VM files
-      /*
-       * println("OUTPUT VM FILE: " outputVM.getAbsolutePath)
+      println("OUTPUT VM FILE: " + outputVM.getAbsolutePath)
       val vmGenerator = VMGenerator(outputVM)
-        vmGenerator.generate(result)
-        vmGenerator.close()
-      */
+      vmGenerator.generate(result)
+      vmGenerator.close()
 
       // 3. optionally generate XML
       // if you pass second param, there'll be no XML code generated :)
@@ -112,15 +37,6 @@ class SquareGame {
     }
 
   }
-
-  /*private def writeCode(f: File, codeGenerator: CodeGenerator) = {
-    val parser = Parser(f)
-    var instruction: Option[I.Instruction] = null
-    while ({ instruction = parser.next(); instruction.isDefined }) {
-      codeGenerator.write(instruction.get, f.getName.dropRight(3)) // must drop ".vm"
-    }
-    parser.close()
-  }*/
 
   /**
    * @return Optional list of tuples (input, outputXML, outputVM)

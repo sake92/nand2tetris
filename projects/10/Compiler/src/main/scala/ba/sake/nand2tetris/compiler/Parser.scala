@@ -8,11 +8,11 @@ import java.nio.file.Files
 
 object AST {
 
-  sealed trait ClassNameOrVarName
+  sealed trait ClassNameOrVarName { def name: String }
 
   /* It is a pity I don't know how to make this stuff easier... :/ */
   sealed trait VoidOrType
-  sealed trait Type extends VoidOrType
+  sealed trait Type extends VoidOrType { def name: String }
   case class ClassName(name: String) extends Type with ClassNameOrVarName
 
   case class VarName(name: String) extends ClassNameOrVarName
@@ -32,9 +32,9 @@ object AST {
 
   // keywords that represent a type
   sealed trait KeywordType extends KeywordTerminal with Type
-  case object Int extends KeywordType { def raw = "int" }
-  case object Char extends KeywordType { def raw = "char" }
-  case object Boolean extends KeywordType { def raw = "boolean" }
+  case object Int extends KeywordType { def raw = "int"; def name = "int" }
+  case object Char extends KeywordType { def raw = "char"; def name = "char" }
+  case object Boolean extends KeywordType { def raw = "boolean"; def name = "boolean" }
 
   // keywords that represent field type
   sealed trait KeywordFieldType extends KeywordTerminal
@@ -48,17 +48,6 @@ object AST {
   case object Method extends SubroutineType { def raw = "method" }
 
   case object Void extends KeywordTerminal with VoidOrType { def raw = "void" } // this one is special :p
-
-  // These are "useless"/"meaingless"/"throw-away" keywords
-  /*case class Keyword(raw: String) extends KeywordTerminal
-  val kwdClass = Keyword("class")
-  val kwdVar = Keyword("var")
-  val kwdLet = Keyword("let")
-  val kwDo = Keyword("do")
-  val kwdIf = Keyword("if")
-  val kwdElse = Keyword("else")
-  val kwdWhile = Keyword("while")
-  val kwdReturn = Keyword("return")*/
 
   /* SYMBOLS */
   sealed trait SymbolTerminal { def raw: String }
@@ -77,18 +66,6 @@ object AST {
   case object LessThan extends BinaryOp { def raw = "<" }
   case object GreaterThan extends BinaryOp { def raw = ">" }
   case object EqualTo extends BinaryOp { def raw = "=" }
-
-  // use-once symbols
-  /*case class Symbol(raw: String) extends SymbolTerminal
-  val symLeftBrace = Symbol("{")
-  val symRightBrace = Symbol("}")
-  val symLeftParen = Symbol("(")
-  val symRightParen = Symbol(")")
-  val symLeftBracket = Symbol("[")
-  val symRightBracket = Symbol("]")
-  val symDot = Symbol(".")
-  val symComma = Symbol(",")
-  val symSemicolon = Symbol(";")*/
 
   case class IntConst(value: Int)
   case class StringConst(value: String)
@@ -136,23 +113,15 @@ object AST {
     parameterList: ParameterList, subroutineBody: SubroutineBody)
 
   case class ClassDec(className: ClassName, classVarDecs: Seq[ClassVarDec], subroutineDecs: Seq[SubroutineDec])
-
 }
 
 /** The parser. */
 class Parser(in: String) {
-
   import Parser._
-
-  import scala.collection.JavaConverters.asScalaIteratorConverter
 
   def analyze(): AST.ClassDec = {
     FINAL_PARSER.parse(in).get.value
   }
-
-  /*def close(): Unit = {
-    br.close()
-  }*/
 }
 
 /**
@@ -251,17 +220,6 @@ object Parser {
 
   val symNegate = P("-").!.map(_ => AST.Negate)
   val symTilda = P("~").!.map(_ => AST.Invert)
-
-  ///////////////////////
-  /*val KEYWORD: P[AST.KeywordTerminal] = P(kwdClass | kwdConstructor | kwdFunction | kwdMethod | kwdField |
-    kwdStatic | kwdVar | kwdInt | kwdChar | kwdBoolean | kwdVoid | kwdTrue | kwdFalse |
-    kwdNull | kwdThis | kwdLet | kwdDo | kwdIf | kwdElse | kwdWhile | kwdReturn)
-
-  val SYMBOL: P[AST.SymbolTerminal] = P(symLeftBrace | symRightBrace | symLeftParen | symRightParen | symLeftBracket | symRightBracket |
-    symDot | symComma | symSemicolon | symPlus | symMinus | symMultiply | symDivide |
-    symAnd | symOr | symLessThan | symGreaterThan | symEqual | symTilda)
-
-    */
 
   val INTEGER_CONSTANT = P(Number).map(AST.IntConst)
   val STRING_CONSTANT = P {

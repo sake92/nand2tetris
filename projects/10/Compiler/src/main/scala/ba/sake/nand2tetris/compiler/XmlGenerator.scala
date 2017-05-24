@@ -11,6 +11,9 @@ class XmlGenerator(outWriter: Writer) {
   // I ignored some of keywords and symbols in the parser.. :D
   // so I insert them manually here... :/
 
+  private def write(str: String) = outWriter.write(str)
+  private def writeLn(str: String) = outWriter.write(str + "\n")
+
   def generate(c: AST.ClassDec): Unit = {
     writeLn("<class>")
     handleKeyword("class")
@@ -21,9 +24,6 @@ class XmlGenerator(outWriter: Writer) {
     handleSymbol("}")
     writeLn("</class>")
   }
-
-  private def write(str: String) = outWriter.write(str)
-  private def writeLn(str: String) = outWriter.write(str + "\n")
 
   private def handleClassVarDec(vd: AST.ClassVarDec) = {
     writeLn("<classVarDec>")
