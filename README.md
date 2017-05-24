@@ -1,10 +1,15 @@
 # nand2tetris
 Nand2Tetris course solutions
 
+Source code (and executable JARs) for:
+- [Assembler](https://github.com/sake92/nand2tetris/tree/master/projects/06)
+- [VM Translator](https://github.com/sake92/nand2tetris/tree/master/projects/07)
+- [Compiler](https://github.com/sake92/nand2tetris/tree/master/projects/10)
+
+[Scala](http://www.scala-lang.org/) <3
+
+
 # TODO
-- Refactor code solutions, and make executable JARs
 - Make some SVG images for logic circuits
 
-Current status: reading CH09
-
-Stay tuned... :P
+Current status: reading CH12, Operating system
