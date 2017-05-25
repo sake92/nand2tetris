@@ -1,5 +1,5 @@
 # nand2tetris
-Nand2Tetris course solutions
+[Nand2Tetris](http://www.nand2tetris.org/) course solutions
 
 Source code (and executable JARs) for:
 - [Assembler](https://github.com/sake92/nand2tetris/tree/master/projects/06)
@@ -9,7 +9,7 @@ Source code (and executable JARs) for:
 [Scala](http://www.scala-lang.org/) <3
 
 
-# TODO
+## TODO
 - Make some SVG images for logic circuits
 
 Current status: reading CH12, Operating system
