@@ -25,7 +25,5 @@ CHIP PC {
     Or(a=load, b=inc, out=loadOrInc);
     Or(a=loadOrInc, b=reset, out=loadOrIncOrReset);
     
-    Register(in=regInput, load=loadOrIncOrReset, out=regOutput);    
-    
-    Or16(a=false, b=regOutput, out=out); // dummy OR gate for output
+    Register(in=regInput, load=loadOrIncOrReset, out=regOutput, out=out);    
 }
